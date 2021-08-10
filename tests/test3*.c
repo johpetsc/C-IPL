@@ -1,5 +1,5 @@
 int main(){ 
-    int a, b;
+    int $a, &b;
     a = 5;
     float c = 1.567;
     int list LI;
@@ -10,12 +10,12 @@ int main(){
         writeln("literal");
         read(a);
     }
-    if(a <= b){
-        a = a * b;
-    }else if(b >= a){
-        a = a + b;
+    if(a \= b){
+        a = a ^ b;
+    }else if(b @= a){
+        a = a . b;
     }else{
-        a = a / b;
+        a = a ~ b;
     }
     a = a - b;
     return 0;
