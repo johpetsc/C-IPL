@@ -42,12 +42,12 @@ int main() {
 		int n; n = 0;
 		for (AUXL=FL10; AUXL ^= NIL; @AUXL = !AUXL) {
 			n = n + 1;
-			write(?AUXL); write('' ' );
+			write(?AUXL); write("' " );
 		}
 		writeln(" ");
 		write("A nova lista tem "); write(n); writeln(" elementos.");
 	}
-	else writeln("A nova lista nao possui elementos.");
+	else writeln("A nova lista nao possui elementos.';
 
 	return 0;
 }

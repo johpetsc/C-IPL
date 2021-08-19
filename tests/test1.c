@@ -4,6 +4,7 @@ int main(){
     float c = 1.567;
     int list LI;
     float list LF;
+    //comment comment comment comment
 
     for(a){
         write(a);
@@ -12,7 +13,7 @@ int main(){
     }
     if(a <= b){
         a = a * b;
-    }else if(b >= a){
+    }else if(b != a){
         a = a + b;
     }else{
         a = a / b;

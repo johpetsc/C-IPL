@@ -1,37 +1,53 @@
 %option noyywrap
+%option noinput nounput
+
 %{     
     #include<stdio.h>
     #include<stdlib.h>
     int line = 1, col = 1, errors = 0;
 %}
 
-/* regular definitions */
-delim       [ \t]
-line_break  \n
-ws          {delim}+
-letter      [A-Za-z]
-digit       [0-9]
-id          {letter}({letter}|{digit}|_)*
-inumber     {digit}+
-fnumber     {digit}+(\.{digit}+)
-types       int|float
-list        list
-list_op     [\?!%:]
-list_func   [<]{2}|[>]{2}
-nil         NIL
-brackets    [\[\]\{\}\(\)]
-end         [;]
-ari_op      [+*/-]
-log_op      [!]|[&]{2}|[|]{2}
-rel_op      [>]|[<]|(>=)|(<=)|(==)!(!=)
-ass_op      (=)
-flow_ctr    if|else|for|return
-input       read
-output      write|writeln
-quot        [\"\']
-separator   ,
-literal     {quot}(\\.|[^\\"])*{quot}
-rest        .
+/* Regular definitions */
+
+/*Definitions for white spaces*/
+delim           [ \s\v\t]
+line_break      \n
+ws              {delim}+
+/*Definitions for single characters*/
+letter          [A-Za-z]
+digit           [0-9]
+/*Definitions for group of characters*/
+id              {letter}({letter}|{digit}|_)*
+inumber         {digit}+
+fnumber         {digit}+(\.{digit}+)
+/*Definitions for C types and keywords*/
+types           int|float
+flow_ctr        if|else|for|return
+/*Definitions for lists*/
+list            list
+list_op         [\?!%:]
+list_func       [<]{2}|[>]{2}
+nil             NIL
+/*Definitions for operators*/
+ari_op          [+*/-]
+log_op          [!]|[&]{2}|[|]{2}
+rel_op          [>]|[<]|(>=)|(<=)|(==)|(!=)
+ass_op          (=)
+/*Definitions for I/O*/
+input           read
+output          write|writeln
+/*Definitions for comments*/
+line_comment    "//".*[^\n]
+block_comment   "/*"((\*+[^/*])|([^*]))*\**"*/"
+/*Definitions for limiters*/
+brackets        [\[\]\{\}\(\)]
+end             [;]
+separator       ,
+/*Definitions for strings*/
+dquot           [\"]
+literal         {dquot}(\\[^\n]|[^\\"\n])*{dquot}
+/*Everything else*/
+rest            .
 
 %%
 
@@ -43,6 +59,18 @@ rest        .
     line++;
     col = 1;
     printf("\n────────────────────────────────────────");
+}
+
+{line_comment}    {
+    printf("\n%d:%d: ", line, col);
+    printf("Line comment: ");
+    printf("%s", yytext);
+}
+
+{block_comment}    {
+    printf("\n%d:%d: ", line, col);
+    printf("Block comment: ");
+    printf("%s", yytext);
 }
 
 {flow_ctr}  {
@@ -57,6 +85,14 @@ rest        .
     printf("⟨in, ");
     printf("%s⟩", yytext);
     col = col + yyleng;
+}
+
+{dquot} {
+    printf("\n%d:%d: ", line, col);
+    printf("ERROR: Literal not closed after ");
+    printf("%s.", yytext);
+    col++;
+    errors++;
 }
 
 {output}    {
@@ -84,7 +120,7 @@ rest        .
     printf("\n%d:%d: ", line, col);
     printf("⟨arithOp, ");
     printf("%s⟩", yytext);
-    col = col++;
+    col++;
 }
 
 {log_op}    {
@@ -175,12 +211,12 @@ rest        .
     printf("\n%d:%d: ", line, col);
     printf("literal, ");
     printf("%s⟩", yytext);
-    col++;
+    col = col + yyleng;
 }
 
 {rest}  {
     printf("\n%d:%d: ", line, col);
-    printf("'%s' ", yytext);
+    printf("ERROR: '%s' ", yytext);
     printf("is not part of the C-IPL language.");
     errors++;
     col++;
@@ -191,11 +227,15 @@ int main(int argc, char **argv){
     printf("────────────────────────────────────────\n");
     printf("Lexical analysis in file '%s'", argv[1]);
     printf("\n────────────────────────────────────────");
+
     yyin = fopen(argv[1], "r");
     yylex();
-    fclose(yyin);
+
     printf("\n");
     printf("Lexical analysis finished with %d errors.\n", errors);
+
+    fclose(yyin);
+    yylex_destroy();
 
     return 0;
 }
