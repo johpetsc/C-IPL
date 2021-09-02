@@ -1,7 +1,7 @@
 int main(){ 
     int a;
     int b;
-    int a;
+    
     a = 5;
     float c;
     c = 1.567;

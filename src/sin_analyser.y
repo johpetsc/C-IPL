@@ -126,6 +126,8 @@ declar:
         newSymbol(table, $3.id, $1.id, "LIST VAR ",$3.line, $3.col);
         $$ = newNode(strcat(strcat($1.id," list "), $3.id));
     }
+    |
+    error { }
 ;
 
 func:
@@ -138,6 +140,8 @@ func:
         newSymbol(table, $2.id, $1.id, "LIST FUNC", $2.line, $2.col);
         $$ = newNode(strcat(strcat($1.id," function list "), $3.id));
     }
+    |
+    error { }
 ;
 
 block:
@@ -201,6 +205,8 @@ if_else:
         $$->subtree2 = $5;
         $$->subtree3 = $7;
     }
+    |
+    IF error ELSE { }
 ;
 
 for:
@@ -211,6 +217,8 @@ for:
         $$->subtree3 = $7;
         $$->subtree4 = $9;
     }
+    |
+    FOR error  {  }
 ;
 
 return:
@@ -352,6 +360,8 @@ func_call:
         $$ = newNode("CALL");
         $$->subtree2 = $1;
     }
+    |
+    error { }
 ;
 
 id:
@@ -381,8 +391,10 @@ int main(int argc, char **argv){
 
     printf("\n");
     printf("Syntax analysis finished with %d errors.\n", errors);
-
-    showTree(syntaxTree, 0);
+    
+    if(!errors){
+        showTree(syntaxTree, 0);
+    }
 
     showTable(table);
     destroyTree();
@@ -394,6 +406,6 @@ int main(int argc, char **argv){
 }
 
 extern void yyerror(const char* error) {
-    printf("%s [%d, %d]", error, line, col);
+    printf("\n%s [%d, %d]\n", error, line, col);
     errors++;
 }
