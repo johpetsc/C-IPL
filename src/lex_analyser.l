@@ -2,8 +2,11 @@
 %option noinput nounput
 
 %{     
-    #include<stdio.h>
-    #include<stdlib.h>
+    #include    "sin_analyser.tab.h"
+    #include    "../lib/data_structures.h"
+    #include    <stdio.h>
+    #include    <stdlib.h>
+    #include    <string.h>
     int line = 1, col = 1, errors = 0;
 %}
 
@@ -54,188 +57,257 @@ rest            .
 {delim}        {col++;}
 
 {line_break}    {
-    printf("\nEnd of line ");
-    printf("%d", line);
+    // printf("\nEnd of line ");
+    // printf("%d", line);
     line++;
     col = 1;
-    printf("\n────────────────────────────────────────");
+    // printf("\n────────────────────────────────────────");
 }
 
 {line_comment}    {
-    printf("\n%d:%d: ", line, col);
-    printf("Line comment: ");
-    printf("%s", yytext);
+    // printf("\n%d:%d: ", line, col);
+    // printf("Line comment: ");
+    // printf("%s", yytext);
 }
 
 {block_comment}    {
-    printf("\n%d:%d: ", line, col);
-    printf("Block comment: ");
-    printf("%s", yytext);
+    // printf("\n%d:%d: ", line, col);
+    // printf("Block comment: ");
+    // printf("%s", yytext);
 }
 
 {flow_ctr}  {
-    printf("\n%d:%d: ", line, col);
-    printf("⟨flowCtr, ");
-    printf("%s⟩", yytext);
+    yylval.lex.line = line;
+    yylval.lex.col = col;
+    strcpy(yylval.lex.id, yytext);
+    // printf("\n%d:%d: ", line, col);
+    // printf("⟨flowCtr, ");
+    // printf("%s⟩", yytext);
     col = col + yyleng;
+    if(!strcmp(yytext, "if")) return IF;
+    else if(!strcmp(yytext, "else")) return ELSE;
+    else if(!strcmp(yytext, "for")) return FOR;
+    else return RETURN;
 }
 
 {input} {
-    printf("\n%d:%d: ", line, col);
-    printf("⟨in, ");
-    printf("%s⟩", yytext);
+    yylval.lex.line = line;
+    yylval.lex.col = col;
+    strcpy(yylval.lex.id, yytext);
+    // printf("\n%d:%d: ", line, col);
+    // printf("⟨in, ");
+    // printf("%s⟩", yytext);
     col = col + yyleng;
+    return IN;
 }
 
 {dquot} {
-    printf("\n%d:%d: ", line, col);
-    printf("ERROR: Literal not closed after ");
-    printf("%s.", yytext);
+    // printf("\n%d:%d: ", line, col);
+    // printf("ERROR: Literal not closed after ");
+    // printf("%s.", yytext);
     col++;
     errors++;
 }
 
 {output}    {
-    printf("\n%d:%d: ", line, col);
-    printf("⟨out, ");
-    printf("%s⟩", yytext);
+    yylval.lex.line = line;
+    yylval.lex.col = col;
+    strcpy(yylval.lex.id, yytext);
+    // printf("\n%d:%d: ", line, col);
+    // printf("⟨out, ");
+    // printf("%s⟩", yytext);
     col = col + yyleng;
+    return OUT;
 }
 
 {list_op}   {
-    printf("\n%d:%d: ", line, col);
-    printf("⟨listOp, ");
-    printf("%s⟩", yytext);
+    yylval.lex.line = line;
+    yylval.lex.col = col;
+    strcpy(yylval.lex.id, yytext);
+    // printf("\n%d:%d: ", line, col);
+    // printf("⟨listOp, ");
+    // printf("%s⟩", yytext);
     col++;
+    if(!strcmp(yytext, ":")) return RLIST_OP;
+    else return LLIST_OP;
 }
 
 {list_func} {
-    printf("\n%d:%d: ", line, col);
-    printf("⟨listFunc, ");
-    printf("%s⟩", yytext);
+    yylval.lex.line = line;
+    yylval.lex.col = col;
+    strcpy(yylval.lex.id, yytext);
+    // printf("\n%d:%d: ", line, col);
+    // printf("⟨listFunc, ");
+    // printf("%s⟩", yytext);
     col++;
+    return LIST_FUNC;
 }
 
 {ari_op}    {
-    printf("\n%d:%d: ", line, col);
-    printf("⟨arithOp, ");
-    printf("%s⟩", yytext);
+    yylval.lex.line = line;
+    yylval.lex.col = col;
+    strcpy(yylval.lex.id, yytext);
+    // printf("\n%d:%d: ", line, col);
+    // printf("⟨arithOp, ");
+    // printf("%s⟩", yytext);
     col++;
+    if((!strcmp(yytext, "+")) || (!strcmp(yytext, "-"))) return SS_OP;
+    else return MD_OP;
 }
 
 {log_op}    {
-    printf("\n%d:%d: ", line, col);
-    printf("⟨logicOp, ");
-    printf("%s⟩", yytext);
+    yylval.lex.line = line;
+    yylval.lex.col = col;
+    strcpy(yylval.lex.id, yytext);
+    // printf("\n%d:%d: ", line, col);
+    // printf("⟨logicOp, ");
+    // printf("%s⟩", yytext);
     col = col + yyleng;
+    if(!strcmp(yytext, "!")) return RLOG_OP;
+    else return LLOG_OP;
 }
 
 {rel_op}    {
-    printf("\n%d:%d: ", line, col);
-    printf("⟨relatOp, ");
-    printf("%s⟩", yytext);
+    yylval.lex.line = line;
+    yylval.lex.col = col;
+    strcpy(yylval.lex.id, yytext);
+    // printf("\n%d:%d: ", line, col);
+    // printf("⟨relatOp, ");
+    // printf("%s⟩", yytext);
     col = col + yyleng;
+    return REL_OP;
 }
 
 {ass_op}    {
-    printf("\n%d:%d: ", line, col);
-    printf("⟨assignOp, ");
-    printf("%s⟩", yytext);
+    yylval.lex.line = line;
+    yylval.lex.col = col;
+    strcpy(yylval.lex.id, yytext);
+    // printf("\n%d:%d: ", line, col);
+    // printf("⟨assignOp, ");
+    // printf("%s⟩", yytext);
     col++;
+    return ASS_OP;
 }
 
 {nil}   {
-    printf("\n%d:%d: ", line, col);
-    printf("⟨NIL, ");
-    printf("%s⟩", yytext);
+    yylval.lex.line = line;
+    yylval.lex.col = col;
+    strcpy(yylval.lex.id, yytext);
+    // printf("\n%d:%d: ", line, col);
+    // printf("⟨NIL, ");
+    // printf("%s⟩", yytext);
     col = col + yyleng;
+    return NIL;
 }
 
 {list}   {
-    printf("\n%d:%d: ", line, col);
-    printf("⟨list, ");
-    printf("%s⟩", yytext);
+    yylval.lex.line = line;
+    yylval.lex.col = col;
+    strcpy(yylval.lex.id, yytext);
+    // printf("\n%d:%d: ", line, col);
+    // printf("⟨list, ");
+    // printf("%s⟩", yytext);
     col = col + yyleng;
+    return LIST;
 }
 
 {types}   {
-    printf("\n%d:%d: ", line, col);
-    printf("⟨type, ");
-    printf("%s⟩", yytext);
+    yylval.lex.line = line;
+    yylval.lex.col = col;
+    strcpy(yylval.lex.id, yytext);
+    // printf("\n%d:%d: ", line, col);
+    // printf("⟨type, ");
+    // printf("%s⟩", yytext);
     col = col + yyleng;
+    return TYPE; 
 }
 
 {inumber}   {
-    printf("\n%d:%d: ", line, col);
-    printf("⟨int, ");
-    printf("%s⟩", yytext);
+    yylval.lex.line = line;
+    yylval.lex.col = col;
+    strcpy(yylval.lex.id, yytext);
+    // printf("\n%d:%d: ", line, col);
+    // printf("⟨int, ");
+    // printf("%s⟩", yytext);
     col = col + yyleng;
+    return INT;
+
 }
 
 {fnumber}   {
-    printf("\n%d:%d: ", line, col);
-    printf("⟨float, ");
-    printf("%s⟩", yytext);
+    yylval.lex.line = line;
+    yylval.lex.col = col;
+    strcpy(yylval.lex.id, yytext);
+    // printf("\n%d:%d: ", line, col);
+    // printf("⟨float, ");
+    // printf("%s⟩", yytext);
     col = col + yyleng;
+    return FLOAT;
 }
 
 {id}   {
-    printf("\n%d:%d: ", line, col);
-    printf("⟨id, ");
-    printf("%s⟩", yytext);
+    yylval.lex.line = line;
+    yylval.lex.col = col;
+    strcpy(yylval.lex.id, yytext);
+    // printf("\n%d:%d: ", line, col);
+    // printf("⟨id, ");
+    // printf("%s⟩", yytext);
     col = col + yyleng;
+    return ID;
 }
 
 {end} {
-    printf("\n%d:%d: ", line, col);
-    printf("⟨endStatement, ");
-    printf("%s⟩", yytext);
+    yylval.lex.line = line;
+    yylval.lex.col = col;
+    strcpy(yylval.lex.id, yytext);
+    // printf("\n%d:%d: ", line, col);
+    // printf("⟨endStatement, ");
+    // printf("%s⟩", yytext);
     col++;
+    return END;
 }
 
 {brackets}  {
-    printf("\n%d:%d: ", line, col);
-    printf("⟨bracket, ");
-    printf("%s⟩", yytext);
+    yylval.lex.line = line;
+    yylval.lex.col = col;
+    strcpy(yylval.lex.id, yytext);
+    // printf("\n%d:%d: ", line, col);
+    // printf("⟨bracket, ");
+    // printf("%s⟩", yytext);
     col++;
+    if(!strcmp(yytext, "{")) return LB;
+    else if(!strcmp(yytext, "}")) return RB;
+    else if(!strcmp(yytext, "(")) return LP;
+    else return RP;
 }
 
 {separator} {
-    printf("\n%d:%d: ", line, col);
-    printf("separator, ");
-    printf("%s⟩", yytext);
+    yylval.lex.line = line;
+    yylval.lex.col = col;
+    strcpy(yylval.lex.id, yytext);
+    // printf("\n%d:%d: ", line, col);
+    // printf("separator, ");
+    // printf("%s⟩", yytext);
     col++;
+    return SEPARATOR;
 }
 
 {literal} {
-    printf("\n%d:%d: ", line, col);
-    printf("literal, ");
-    printf("%s⟩", yytext);
+    yylval.lex.line = line;
+    yylval.lex.col = col;
+    strcpy(yylval.lex.id, yytext);
+    // printf("\n%d:%d: ", line, col);
+    // printf("literal, ");
+    // printf("%s⟩", yytext);
     col = col + yyleng;
+    return LITERAL;
 }
 
 {rest}  {
-    printf("\n%d:%d: ", line, col);
-    printf("ERROR: '%s' ", yytext);
-    printf("is not part of the C-IPL language.");
+    // printf("\n%d:%d: ", line, col);
+    // printf("ERROR: '%s' ", yytext);
+    // printf("is not part of the C-IPL language.");
     errors++;
     col++;
 }
 %%
-
-int main(int argc, char **argv){
-    printf("────────────────────────────────────────\n");
-    printf("Lexical analysis in file '%s'", argv[1]);
-    printf("\n────────────────────────────────────────");
-
-    yyin = fopen(argv[1], "r");
-    yylex();
-
-    printf("\n");
-    printf("Lexical analysis finished with %d errors.\n", errors);
-
-    fclose(yyin);
-    yylex_destroy();
-
-    return 0;
-}

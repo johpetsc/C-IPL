@@ -495,10 +495,13 @@ char *yytext;
 #line 1 "src/lex_analyser.l"
 #define YY_NO_INPUT 1
 #line 5 "src/lex_analyser.l"
-    #include<stdio.h>
-    #include<stdlib.h>
+    #include    "sin_analyser.tab.h"
+    #include    "../lib/data_structures.h"
+    #include    <stdio.h>
+    #include    <stdlib.h>
+    #include    <string.h>
     int line = 1, col = 1, errors = 0;
-#line 502 "src/lex.yy.c"
+#line 505 "src/lex.yy.c"
 /* Regular definitions */
 /*Definitions for white spaces*/
 /*Definitions for single characters*/
@@ -511,7 +514,7 @@ char *yytext;
 /*Definitions for limiters*/
 /*Definitions for strings*/
 /*Everything else*/
-#line 515 "src/lex.yy.c"
+#line 518 "src/lex.yy.c"
 
 #define INITIAL 0
 
@@ -726,10 +729,10 @@ YY_DECL
 		}
 
 	{
-#line 52 "src/lex_analyser.l"
+#line 55 "src/lex_analyser.l"
 
 
-#line 733 "src/lex.yy.c"
+#line 736 "src/lex.yy.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -788,258 +791,344 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 54 "src/lex_analyser.l"
+#line 57 "src/lex_analyser.l"
 {col++;}
 	YY_BREAK
 case 2:
 /* rule 2 can match eol */
 YY_RULE_SETUP
-#line 56 "src/lex_analyser.l"
+#line 59 "src/lex_analyser.l"
 {
-    printf("\nEnd of line ");
-    printf("%d", line);
+    // printf("\nEnd of line ");
+    // printf("%d", line);
     line++;
     col = 1;
-    printf("\n────────────────────────────────────────");
+    // printf("\n────────────────────────────────────────");
 }
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 64 "src/lex_analyser.l"
+#line 67 "src/lex_analyser.l"
 {
-    printf("\n%d:%d: ", line, col);
-    printf("Line comment: ");
-    printf("%s", yytext);
+    // printf("\n%d:%d: ", line, col);
+    // printf("Line comment: ");
+    // printf("%s", yytext);
 }
 	YY_BREAK
 case 4:
 /* rule 4 can match eol */
 YY_RULE_SETUP
-#line 70 "src/lex_analyser.l"
+#line 73 "src/lex_analyser.l"
 {
-    printf("\n%d:%d: ", line, col);
-    printf("Block comment: ");
-    printf("%s", yytext);
+    // printf("\n%d:%d: ", line, col);
+    // printf("Block comment: ");
+    // printf("%s", yytext);
 }
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 76 "src/lex_analyser.l"
+#line 79 "src/lex_analyser.l"
 {
-    printf("\n%d:%d: ", line, col);
-    printf("⟨flowCtr, ");
-    printf("%s⟩", yytext);
+    yylval.lex.line = line;
+    yylval.lex.col = col;
+    strcpy(yylval.lex.id, yytext);
+    // printf("\n%d:%d: ", line, col);
+    // printf("⟨flowCtr, ");
+    // printf("%s⟩", yytext);
     col = col + yyleng;
+    if(!strcmp(yytext, "if")) return IF;
+    else if(!strcmp(yytext, "else")) return ELSE;
+    else if(!strcmp(yytext, "for")) return FOR;
+    else return RETURN;
 }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 83 "src/lex_analyser.l"
+#line 93 "src/lex_analyser.l"
 {
-    printf("\n%d:%d: ", line, col);
-    printf("⟨in, ");
-    printf("%s⟩", yytext);
+    yylval.lex.line = line;
+    yylval.lex.col = col;
+    strcpy(yylval.lex.id, yytext);
+    // printf("\n%d:%d: ", line, col);
+    // printf("⟨in, ");
+    // printf("%s⟩", yytext);
     col = col + yyleng;
+    return IN;
 }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 90 "src/lex_analyser.l"
+#line 104 "src/lex_analyser.l"
 {
-    printf("\n%d:%d: ", line, col);
-    printf("ERROR: Literal not closed after ");
-    printf("%s.", yytext);
+    // printf("\n%d:%d: ", line, col);
+    // printf("ERROR: Literal not closed after ");
+    // printf("%s.", yytext);
     col++;
     errors++;
 }
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 98 "src/lex_analyser.l"
+#line 112 "src/lex_analyser.l"
 {
-    printf("\n%d:%d: ", line, col);
-    printf("⟨out, ");
-    printf("%s⟩", yytext);
+    yylval.lex.line = line;
+    yylval.lex.col = col;
+    strcpy(yylval.lex.id, yytext);
+    // printf("\n%d:%d: ", line, col);
+    // printf("⟨out, ");
+    // printf("%s⟩", yytext);
     col = col + yyleng;
+    return OUT;
 }
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 105 "src/lex_analyser.l"
+#line 123 "src/lex_analyser.l"
 {
-    printf("\n%d:%d: ", line, col);
-    printf("⟨listOp, ");
-    printf("%s⟩", yytext);
+    yylval.lex.line = line;
+    yylval.lex.col = col;
+    strcpy(yylval.lex.id, yytext);
+    // printf("\n%d:%d: ", line, col);
+    // printf("⟨listOp, ");
+    // printf("%s⟩", yytext);
     col++;
+    if(!strcmp(yytext, ":")) return RLIST_OP;
+    else return LLIST_OP;
 }
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 112 "src/lex_analyser.l"
+#line 135 "src/lex_analyser.l"
 {
-    printf("\n%d:%d: ", line, col);
-    printf("⟨listFunc, ");
-    printf("%s⟩", yytext);
+    yylval.lex.line = line;
+    yylval.lex.col = col;
+    strcpy(yylval.lex.id, yytext);
+    // printf("\n%d:%d: ", line, col);
+    // printf("⟨listFunc, ");
+    // printf("%s⟩", yytext);
     col++;
+    return LIST_FUNC;
 }
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 119 "src/lex_analyser.l"
+#line 146 "src/lex_analyser.l"
 {
-    printf("\n%d:%d: ", line, col);
-    printf("⟨arithOp, ");
-    printf("%s⟩", yytext);
+    yylval.lex.line = line;
+    yylval.lex.col = col;
+    strcpy(yylval.lex.id, yytext);
+    // printf("\n%d:%d: ", line, col);
+    // printf("⟨arithOp, ");
+    // printf("%s⟩", yytext);
     col++;
+    if((!strcmp(yytext, "+")) || (!strcmp(yytext, "-"))) return SS_OP;
+    else return MD_OP;
 }
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 126 "src/lex_analyser.l"
+#line 158 "src/lex_analyser.l"
 {
-    printf("\n%d:%d: ", line, col);
-    printf("⟨logicOp, ");
-    printf("%s⟩", yytext);
+    yylval.lex.line = line;
+    yylval.lex.col = col;
+    strcpy(yylval.lex.id, yytext);
+    // printf("\n%d:%d: ", line, col);
+    // printf("⟨logicOp, ");
+    // printf("%s⟩", yytext);
     col = col + yyleng;
+    if(!strcmp(yytext, "!")) return RLOG_OP;
+    else return LLOG_OP;
 }
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 133 "src/lex_analyser.l"
+#line 170 "src/lex_analyser.l"
 {
-    printf("\n%d:%d: ", line, col);
-    printf("⟨relatOp, ");
-    printf("%s⟩", yytext);
+    yylval.lex.line = line;
+    yylval.lex.col = col;
+    strcpy(yylval.lex.id, yytext);
+    // printf("\n%d:%d: ", line, col);
+    // printf("⟨relatOp, ");
+    // printf("%s⟩", yytext);
     col = col + yyleng;
+    return REL_OP;
 }
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 140 "src/lex_analyser.l"
+#line 181 "src/lex_analyser.l"
 {
-    printf("\n%d:%d: ", line, col);
-    printf("⟨assignOp, ");
-    printf("%s⟩", yytext);
+    yylval.lex.line = line;
+    yylval.lex.col = col;
+    strcpy(yylval.lex.id, yytext);
+    // printf("\n%d:%d: ", line, col);
+    // printf("⟨assignOp, ");
+    // printf("%s⟩", yytext);
     col++;
+    return ASS_OP;
 }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 147 "src/lex_analyser.l"
+#line 192 "src/lex_analyser.l"
 {
-    printf("\n%d:%d: ", line, col);
-    printf("⟨NIL, ");
-    printf("%s⟩", yytext);
+    yylval.lex.line = line;
+    yylval.lex.col = col;
+    strcpy(yylval.lex.id, yytext);
+    // printf("\n%d:%d: ", line, col);
+    // printf("⟨NIL, ");
+    // printf("%s⟩", yytext);
     col = col + yyleng;
+    return NIL;
 }
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 154 "src/lex_analyser.l"
+#line 203 "src/lex_analyser.l"
 {
-    printf("\n%d:%d: ", line, col);
-    printf("⟨list, ");
-    printf("%s⟩", yytext);
+    yylval.lex.line = line;
+    yylval.lex.col = col;
+    strcpy(yylval.lex.id, yytext);
+    // printf("\n%d:%d: ", line, col);
+    // printf("⟨list, ");
+    // printf("%s⟩", yytext);
     col = col + yyleng;
+    return LIST;
 }
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 161 "src/lex_analyser.l"
+#line 214 "src/lex_analyser.l"
 {
-    printf("\n%d:%d: ", line, col);
-    printf("⟨type, ");
-    printf("%s⟩", yytext);
+    yylval.lex.line = line;
+    yylval.lex.col = col;
+    strcpy(yylval.lex.id, yytext);
+    // printf("\n%d:%d: ", line, col);
+    // printf("⟨type, ");
+    // printf("%s⟩", yytext);
     col = col + yyleng;
+    return TYPE; 
 }
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 168 "src/lex_analyser.l"
+#line 225 "src/lex_analyser.l"
 {
-    printf("\n%d:%d: ", line, col);
-    printf("⟨int, ");
-    printf("%s⟩", yytext);
+    yylval.lex.line = line;
+    yylval.lex.col = col;
+    strcpy(yylval.lex.id, yytext);
+    // printf("\n%d:%d: ", line, col);
+    // printf("⟨int, ");
+    // printf("%s⟩", yytext);
     col = col + yyleng;
+    return INT;
+
 }
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 175 "src/lex_analyser.l"
+#line 237 "src/lex_analyser.l"
 {
-    printf("\n%d:%d: ", line, col);
-    printf("⟨float, ");
-    printf("%s⟩", yytext);
+    yylval.lex.line = line;
+    yylval.lex.col = col;
+    strcpy(yylval.lex.id, yytext);
+    // printf("\n%d:%d: ", line, col);
+    // printf("⟨float, ");
+    // printf("%s⟩", yytext);
     col = col + yyleng;
+    return FLOAT;
 }
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 182 "src/lex_analyser.l"
+#line 248 "src/lex_analyser.l"
 {
-    printf("\n%d:%d: ", line, col);
-    printf("⟨id, ");
-    printf("%s⟩", yytext);
+    yylval.lex.line = line;
+    yylval.lex.col = col;
+    strcpy(yylval.lex.id, yytext);
+    // printf("\n%d:%d: ", line, col);
+    // printf("⟨id, ");
+    // printf("%s⟩", yytext);
     col = col + yyleng;
+    return ID;
 }
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 189 "src/lex_analyser.l"
+#line 259 "src/lex_analyser.l"
 {
-    printf("\n%d:%d: ", line, col);
-    printf("⟨endStatement, ");
-    printf("%s⟩", yytext);
+    yylval.lex.line = line;
+    yylval.lex.col = col;
+    strcpy(yylval.lex.id, yytext);
+    // printf("\n%d:%d: ", line, col);
+    // printf("⟨endStatement, ");
+    // printf("%s⟩", yytext);
     col++;
+    return END;
 }
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 196 "src/lex_analyser.l"
+#line 270 "src/lex_analyser.l"
 {
-    printf("\n%d:%d: ", line, col);
-    printf("⟨bracket, ");
-    printf("%s⟩", yytext);
+    yylval.lex.line = line;
+    yylval.lex.col = col;
+    strcpy(yylval.lex.id, yytext);
+    // printf("\n%d:%d: ", line, col);
+    // printf("⟨bracket, ");
+    // printf("%s⟩", yytext);
     col++;
+    if(!strcmp(yytext, "{")) return LB;
+    else if(!strcmp(yytext, "}")) return RB;
+    else if(!strcmp(yytext, "(")) return LP;
+    else return RP;
 }
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 203 "src/lex_analyser.l"
+#line 284 "src/lex_analyser.l"
 {
-    printf("\n%d:%d: ", line, col);
-    printf("separator, ");
-    printf("%s⟩", yytext);
+    yylval.lex.line = line;
+    yylval.lex.col = col;
+    strcpy(yylval.lex.id, yytext);
+    // printf("\n%d:%d: ", line, col);
+    // printf("separator, ");
+    // printf("%s⟩", yytext);
     col++;
+    return SEPARATOR;
 }
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 210 "src/lex_analyser.l"
+#line 295 "src/lex_analyser.l"
 {
-    printf("\n%d:%d: ", line, col);
-    printf("literal, ");
-    printf("%s⟩", yytext);
+    yylval.lex.line = line;
+    yylval.lex.col = col;
+    strcpy(yylval.lex.id, yytext);
+    // printf("\n%d:%d: ", line, col);
+    // printf("literal, ");
+    // printf("%s⟩", yytext);
     col = col + yyleng;
+    return LITERAL;
 }
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 217 "src/lex_analyser.l"
+#line 306 "src/lex_analyser.l"
 {
-    printf("\n%d:%d: ", line, col);
-    printf("ERROR: '%s' ", yytext);
-    printf("is not part of the C-IPL language.");
+    // printf("\n%d:%d: ", line, col);
+    // printf("ERROR: '%s' ", yytext);
+    // printf("is not part of the C-IPL language.");
     errors++;
     col++;
 }
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 224 "src/lex_analyser.l"
+#line 313 "src/lex_analyser.l"
 ECHO;
 	YY_BREAK
-#line 1043 "src/lex.yy.c"
+#line 1132 "src/lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -2007,22 +2096,5 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 224 "src/lex_analyser.l"
+#line 313 "src/lex_analyser.l"
 
-
-int main(int argc, char **argv){
-    printf("────────────────────────────────────────\n");
-    printf("Lexical analysis in file '%s'", argv[1]);
-    printf("\n────────────────────────────────────────");
-
-    yyin = fopen(argv[1], "r");
-    yylex();
-
-    printf("\n");
-    printf("Lexical analysis finished with %d errors.\n", errors);
-
-    fclose(yyin);
-    yylex_destroy();
-
-    return 0;
-}

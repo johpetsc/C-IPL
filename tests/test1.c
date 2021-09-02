@@ -1,12 +1,15 @@
 int main(){ 
-    int a, b;
+    int a;
+    int b;
+    int a;
     a = 5;
-    float c = 1.567;
+    float c;
+    c = 1.567;
     int list LI;
     float list LF;
     //comment comment comment comment
 
-    for(a){
+    for(i = 1; i < 10; i = i + 1){
         write(a);
         writeln("literal");
         read(a);

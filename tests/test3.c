@@ -1,7 +1,10 @@
 int main(){ 
-    int $a, &b;
+    int a;
+    int b;
+    int a;
     a = 5;
-    float c = 1.567;
+    float c;
+    c = 1.567;
     int list LI;
     float list LF;
 
@@ -10,7 +13,7 @@ int main(){
         writeln("literal");
         read(a);
     }
-    if(a \= b){
+    if a{
         a = a ^ b;
     }else if(b @= a){
         a = a . b;
