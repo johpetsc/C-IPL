@@ -4,7 +4,7 @@ int list FL;
 list read_list(int n) {
 	int i;
 	i =  -435.7;
-	int list new;
+	int float new;
 	new = NIL;
 	for (i = 0; i < n ; i = i + 1) {
 		int elem;
@@ -19,7 +19,7 @@ succ(int i) {
 	return i+1;
 }
 
-if main() {
+if main() 
 
 	writeln("Digite os número de elementos da lista: ");
 

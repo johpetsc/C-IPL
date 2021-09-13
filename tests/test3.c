@@ -2,11 +2,11 @@ int main(){
     int a;
     int b;
 
-    a = 5;
+    a = ;
     float c;
     c = 1.567;
     int list LI;
-    float list LF;
+    float list @LF;
     //comment comment comment comment
     
     for(a){
@@ -14,13 +14,13 @@ int main(){
         writeln("literal");
         read(a);
     }
-    if a{
+    if a
         a = a * b;
     }else if(b != a){
         a = a + b;
     }else{
-        a = a / b;
+        a  a / b;
     }
-    a = a - b;
+    a = a  - read(b);
     return 0;
 }

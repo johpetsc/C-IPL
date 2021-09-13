@@ -387,7 +387,7 @@ static const YY_CHAR yy_ec[256] =
        17,   18,    6,    1,   19,   19,   19,   19,   19,   19,
        19,   19,   20,   19,   19,   21,   19,   22,   19,   19,
        19,   19,   19,   19,   19,   19,   19,   19,   19,   19,
-        8,   23,    8,    1,   24,    1,   25,   19,   19,   26,
+        1,   23,    1,    1,   24,    1,   25,   19,   19,   26,
 
        27,   28,   19,   19,   29,   19,   19,   30,   19,   31,
        32,   19,   19,   33,   34,   35,   36,   19,   37,   19,
@@ -496,12 +496,8 @@ char *yytext;
 #define YY_NO_INPUT 1
 #line 5 "src/lex_analyser.l"
     #include    "sin_analyser.tab.h"
-    #include    "../lib/data_structures.h"
-    #include    <stdio.h>
-    #include    <stdlib.h>
-    #include    <string.h>
-    int line = 1, col = 1, errors = 0;
-#line 505 "src/lex.yy.c"
+    int line = 1, col = 1, lex_errors = 0;
+#line 501 "src/lex.yy.c"
 /* Regular definitions */
 /*Definitions for white spaces*/
 /*Definitions for single characters*/
@@ -514,7 +510,7 @@ char *yytext;
 /*Definitions for limiters*/
 /*Definitions for strings*/
 /*Everything else*/
-#line 518 "src/lex.yy.c"
+#line 514 "src/lex.yy.c"
 
 #define INITIAL 0
 
@@ -729,10 +725,10 @@ YY_DECL
 		}
 
 	{
-#line 55 "src/lex_analyser.l"
+#line 51 "src/lex_analyser.l"
 
 
-#line 736 "src/lex.yy.c"
+#line 732 "src/lex.yy.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -791,13 +787,13 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 57 "src/lex_analyser.l"
+#line 53 "src/lex_analyser.l"
 {col++;}
 	YY_BREAK
 case 2:
 /* rule 2 can match eol */
 YY_RULE_SETUP
-#line 59 "src/lex_analyser.l"
+#line 55 "src/lex_analyser.l"
 {
     // printf("\nEnd of line ");
     // printf("%d", line);
@@ -808,7 +804,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 67 "src/lex_analyser.l"
+#line 63 "src/lex_analyser.l"
 {
     // printf("\n%d:%d: ", line, col);
     // printf("Line comment: ");
@@ -818,7 +814,7 @@ YY_RULE_SETUP
 case 4:
 /* rule 4 can match eol */
 YY_RULE_SETUP
-#line 73 "src/lex_analyser.l"
+#line 69 "src/lex_analyser.l"
 {
     // printf("\n%d:%d: ", line, col);
     // printf("Block comment: ");
@@ -827,7 +823,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 79 "src/lex_analyser.l"
+#line 75 "src/lex_analyser.l"
 {
     yylval.lex.line = line;
     yylval.lex.col = col;
@@ -844,7 +840,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 93 "src/lex_analyser.l"
+#line 89 "src/lex_analyser.l"
 {
     yylval.lex.line = line;
     yylval.lex.col = col;
@@ -858,18 +854,18 @@ YY_RULE_SETUP
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 104 "src/lex_analyser.l"
+#line 100 "src/lex_analyser.l"
 {
-    // printf("\n%d:%d: ", line, col);
-    // printf("ERROR: Literal not closed after ");
-    // printf("%s.", yytext);
+    printf("\n%d:%d: ", line, col);
+    printf("ERROR: Literal not closed after ");
+    printf("%s.", yytext);
     col++;
-    errors++;
+    lex_errors++;
 }
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 112 "src/lex_analyser.l"
+#line 108 "src/lex_analyser.l"
 {
     yylval.lex.line = line;
     yylval.lex.col = col;
@@ -883,7 +879,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 123 "src/lex_analyser.l"
+#line 119 "src/lex_analyser.l"
 {
     yylval.lex.line = line;
     yylval.lex.col = col;
@@ -898,7 +894,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 135 "src/lex_analyser.l"
+#line 131 "src/lex_analyser.l"
 {
     yylval.lex.line = line;
     yylval.lex.col = col;
@@ -912,7 +908,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 146 "src/lex_analyser.l"
+#line 142 "src/lex_analyser.l"
 {
     yylval.lex.line = line;
     yylval.lex.col = col;
@@ -927,7 +923,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 158 "src/lex_analyser.l"
+#line 154 "src/lex_analyser.l"
 {
     yylval.lex.line = line;
     yylval.lex.col = col;
@@ -942,7 +938,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 170 "src/lex_analyser.l"
+#line 166 "src/lex_analyser.l"
 {
     yylval.lex.line = line;
     yylval.lex.col = col;
@@ -956,7 +952,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 181 "src/lex_analyser.l"
+#line 177 "src/lex_analyser.l"
 {
     yylval.lex.line = line;
     yylval.lex.col = col;
@@ -970,7 +966,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 192 "src/lex_analyser.l"
+#line 188 "src/lex_analyser.l"
 {
     yylval.lex.line = line;
     yylval.lex.col = col;
@@ -984,7 +980,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 203 "src/lex_analyser.l"
+#line 199 "src/lex_analyser.l"
 {
     yylval.lex.line = line;
     yylval.lex.col = col;
@@ -998,7 +994,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 214 "src/lex_analyser.l"
+#line 210 "src/lex_analyser.l"
 {
     yylval.lex.line = line;
     yylval.lex.col = col;
@@ -1012,7 +1008,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 225 "src/lex_analyser.l"
+#line 221 "src/lex_analyser.l"
 {
     yylval.lex.line = line;
     yylval.lex.col = col;
@@ -1027,7 +1023,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 237 "src/lex_analyser.l"
+#line 233 "src/lex_analyser.l"
 {
     yylval.lex.line = line;
     yylval.lex.col = col;
@@ -1041,7 +1037,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 248 "src/lex_analyser.l"
+#line 244 "src/lex_analyser.l"
 {
     yylval.lex.line = line;
     yylval.lex.col = col;
@@ -1055,7 +1051,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 259 "src/lex_analyser.l"
+#line 255 "src/lex_analyser.l"
 {
     yylval.lex.line = line;
     yylval.lex.col = col;
@@ -1069,7 +1065,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 270 "src/lex_analyser.l"
+#line 266 "src/lex_analyser.l"
 {
     yylval.lex.line = line;
     yylval.lex.col = col;
@@ -1086,7 +1082,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 284 "src/lex_analyser.l"
+#line 280 "src/lex_analyser.l"
 {
     yylval.lex.line = line;
     yylval.lex.col = col;
@@ -1100,7 +1096,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 295 "src/lex_analyser.l"
+#line 291 "src/lex_analyser.l"
 {
     yylval.lex.line = line;
     yylval.lex.col = col;
@@ -1114,21 +1110,21 @@ YY_RULE_SETUP
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 306 "src/lex_analyser.l"
+#line 302 "src/lex_analyser.l"
 {
-    // printf("\n%d:%d: ", line, col);
-    // printf("ERROR: '%s' ", yytext);
-    // printf("is not part of the C-IPL language.");
-    errors++;
+    printf("\n%d:%d: ", line, col);
+    printf("ERROR: '%s' ", yytext);
+    printf("is not part of the C-IPL language.");
+    lex_errors++;
     col++;
 }
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 313 "src/lex_analyser.l"
+#line 309 "src/lex_analyser.l"
 ECHO;
 	YY_BREAK
-#line 1132 "src/lex.yy.c"
+#line 1128 "src/lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -2096,5 +2092,5 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 313 "src/lex_analyser.l"
+#line 309 "src/lex_analyser.l"
 

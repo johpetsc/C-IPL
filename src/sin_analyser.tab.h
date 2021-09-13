@@ -55,15 +55,15 @@ extern int yydebug;
     ID = 261,
     LIST = 262,
     IF = 263,
-    FOR = 264,
-    RETURN = 265,
-    OUT = 266,
-    IN = 267,
-    SS_OP = 268,
-    MD_OP = 269,
-    LLOG_OP = 270,
-    RLOG_OP = 271,
-    ELSE = 272,
+    ELSE = 264,
+    FOR = 265,
+    RETURN = 266,
+    OUT = 267,
+    IN = 268,
+    SS_OP = 269,
+    MD_OP = 270,
+    LLOG_OP = 271,
+    RLOG_OP = 272,
     REL_OP = 273,
     ASS_OP = 274,
     LIST_FUNC = 275,
@@ -84,16 +84,18 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 20 "src/sin_analyser.y"
+#line 22 "src/sin_analyser.y"
 
+    /*Token structure*/
     struct lexToken {
         char id[200];
         int line;
         int col;
     } lex;
+    /*Tree node reference*/
     struct treeNode* treeNode;
 
-#line 97 "src/sin_analyser.tab.h"
+#line 99 "src/sin_analyser.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

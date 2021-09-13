@@ -3,11 +3,7 @@
 
 %{     
     #include    "sin_analyser.tab.h"
-    #include    "../lib/data_structures.h"
-    #include    <stdio.h>
-    #include    <stdlib.h>
-    #include    <string.h>
-    int line = 1, col = 1, errors = 0;
+    int line = 1, col = 1, lex_errors = 0;
 %}
 
 /* Regular definitions */
@@ -43,7 +39,7 @@ output          write|writeln
 line_comment    "//".*[^\n]
 block_comment   "/*"((\*+[^/*])|([^*]))*\**"*/"
 /*Definitions for limiters*/
-brackets        [\[\]\{\}\(\)]
+brackets        [\{\}\(\)]
 end             [;]
 separator       ,
 /*Definitions for strings*/
@@ -102,11 +98,11 @@ rest            .
 }
 
 {dquot} {
-    // printf("\n%d:%d: ", line, col);
-    // printf("ERROR: Literal not closed after ");
-    // printf("%s.", yytext);
+    printf("\n%d:%d: ", line, col);
+    printf("ERROR: Literal not closed after ");
+    printf("%s.", yytext);
     col++;
-    errors++;
+    lex_errors++;
 }
 
 {output}    {
@@ -304,10 +300,10 @@ rest            .
 }
 
 {rest}  {
-    // printf("\n%d:%d: ", line, col);
-    // printf("ERROR: '%s' ", yytext);
-    // printf("is not part of the C-IPL language.");
-    errors++;
+    printf("\n%d:%d: ", line, col);
+    printf("ERROR: '%s' ", yytext);
+    printf("is not part of the C-IPL language.");
+    lex_errors++;
     col++;
 }
 %%

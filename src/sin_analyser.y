@@ -13,63 +13,56 @@
     extern void yyerror(const char* error);
     extern int line;
     extern int col;
-    extern int errors;
+    extern int lex_errors;
     extern FILE *yyin;
+    int scope = 0;
+    int sin_errors = 0;
 %}
 
 %union{
+    /*Token structure*/
     struct lexToken {
         char id[200];
         int line;
         int col;
     } lex;
+    /*Tree node reference*/
     struct treeNode* treeNode;
 }
 
+/*Lexical Tokens*/
 %token <lex> INT FLOAT TYPE ID LIST
-%token <lex> IF FOR RETURN OUT IN
-%left  <lex> SS_OP MD_OP
-%token  <lex> LLOG_OP
-%token <lex> RLOG_OP
-%right <lex> ELSE
+%token <lex> IF ELSE FOR RETURN OUT IN
+%token <lex> SS_OP MD_OP
+%token <lex> LLOG_OP RLOG_OP
 %token <lex> REL_OP ASS_OP
 %token <lex> LIST_FUNC NIL LLIST_OP RLIST_OP
 %token <lex> LITERAL
 %token <lex> LB RB LP RP END SEPARATOR
 
+/*Precedences*/
+%left SS_OP
+%left MD_OP
+%left LLOG_OP 
+%right LIST_FUNC
+%right RLIST_OP
+%right LLIST_OP
+%right RLOG_OP
+%right ELSE
+
+/*Grammar types*/
 %type <treeNode> start
-%type <treeNode> program
-%type <treeNode> program_block
-%type <treeNode> declar
-%type <treeNode> func_dclr
-%type <treeNode> params
-%type <treeNode> func
-%type <treeNode> block
-%type <treeNode> flow_ctr
-%type <treeNode> statement
-%type <treeNode> if_else
-%type <treeNode> for
-%type <treeNode> return
-%type <treeNode> expr
-%type <treeNode> ass_op
-%type <treeNode> operation
-%type <treeNode> input
-%type <treeNode> output
-%type <treeNode> log_op
-%type <treeNode> list_op
-%type <treeNode> list_con
-%type <treeNode> list_oper
-%type <treeNode> list_func
-%type <treeNode> ulog_op
-%type <treeNode> rel_op
-%type <treeNode> ari_op
-%type <treeNode> md_op
-%type <treeNode> val
+%type <treeNode> program program_block
+%type <treeNode> declar func_dclr params func
+%type <treeNode> block statement expr operation val
+%type <treeNode> flow_ctr if_else for return
+%type <treeNode> ass_op log_op ulog_op rel_op ari_op md_op
+%type <treeNode> input output
+%type <treeNode> list_op list_con list_oper list_func
 %type <treeNode> id
-%type <treeNode> func_call
-%type <treeNode> func_params
+%type <treeNode> func_call func_params
 
-
+/*Grammar*/
 %%
 start:
     program { syntaxTree = $$; }
@@ -89,6 +82,8 @@ program_block:
     declar END { $$ = $1; }
     | 
     func_dclr { $$ = $1; }
+    |
+    error { }
 ;
 
 func_dclr:
@@ -118,12 +113,12 @@ params:
 
 declar:
     TYPE ID {
-        newSymbol(table, $2.id, $1.id, "VAR      ", $2.line, $2.col);      
-        $$ = newNode(strcat(strcat($1.id," "), $2.id));
+        newSymbol(table, $2.id, $1.id, "VAR      ", $2.line, $2.col, scope);      
+        $$ = newNode(strcat(strcat($1.id," var "), $2.id));
     }
     |
     TYPE LIST ID {
-        newSymbol(table, $3.id, $1.id, "LIST VAR ",$3.line, $3.col);
+        newSymbol(table, $3.id, $1.id, "LIST VAR ",$3.line, $3.col, scope);
         $$ = newNode(strcat(strcat($1.id," list "), $3.id));
     }
     |
@@ -132,12 +127,14 @@ declar:
 
 func:
     TYPE ID {
-        newSymbol(table, $2.id, $1.id, "FUNC     ", $2.line, $2.col);
+        scope++;
+        newSymbol(table, $2.id, $1.id, "FUNC     ", $2.line, $2.col, scope);
         $$ = newNode(strcat(strcat($1.id," function "), $2.id));
     }
     |
     TYPE LIST ID {
-        newSymbol(table, $2.id, $1.id, "LIST FUNC", $2.line, $2.col);
+        scope++;
+        newSymbol(table, $2.id, $1.id, "LIST FUNC", $2.line, $2.col, scope);
         $$ = newNode(strcat(strcat($1.id," function list "), $3.id));
     }
     |
@@ -156,10 +153,14 @@ block:
 
 statement:
     expr END { $$ = $1; }
-    | 
+    |
+    ass_op END{ $$ = $1; }
+    |
     LB block RB { $$ = $2; }
     | 
     flow_ctr { $$ = $1; }
+    |
+    error  {  }
 ;
 
 flow_ctr:
@@ -171,8 +172,6 @@ flow_ctr:
 ;
 
 expr:
-    ass_op { $$ = $1; }
-    |
     operation { $$ = $1; }
     |
     declar { $$ = $1; }
@@ -206,7 +205,7 @@ if_else:
         $$->subtree3 = $7;
     }
     |
-    IF error ELSE { }
+    IF error { }
 ;
 
 for:
@@ -237,7 +236,7 @@ ass_op:
 ;
 
 list_con:
-    id RLIST_OP expr {
+    expr RLIST_OP id {
         $$ = newNode("LIST OP");
         $$->subtree1 = $1;
         $$->subtree2 = $3;
@@ -275,6 +274,11 @@ output:
         $$ = newNode("OUT");
         $$->subtree1 = $3;
     }
+    |
+    OUT LP list_oper RP { 
+        $$ = newNode("OUT");
+        $$->subtree1 = $3; 
+    }
 ;
 
 log_op:
@@ -308,7 +312,7 @@ rel_op:
 
 ari_op:
     ari_op SS_OP md_op {
-        $$ = newNode("ARI OP");
+        $$ = newNode("ARI SS OP");
         $$->subtree1 = $1;
         $$->subtree2 = $3;
     }
@@ -318,7 +322,7 @@ ari_op:
 
 md_op:
     md_op MD_OP val {
-        $$ = newNode("ARI OP");
+        $$ = newNode("ARI MD OP");
         $$->subtree1 = $1;
         $$->subtree2 = $3;
     }
@@ -345,8 +349,6 @@ val:
     NIL { $$ = newNode("NIL"); }
     |
     LITERAL { $$ = newNode($1.id); }
-    | 
-    operation { $$ = $1; }
 ;
 
 func_call:
@@ -360,8 +362,6 @@ func_call:
         $$ = newNode("CALL");
         $$->subtree2 = $1;
     }
-    |
-    error { }
 ;
 
 id:
@@ -390,9 +390,9 @@ int main(int argc, char **argv){
     yyparse();
 
     printf("\n");
-    printf("Syntax analysis finished with %d errors.\n", errors);
+    printf("Syntax analysis finished with %d syntax errors and %d lexical errors.\n", sin_errors, lex_errors);
     
-    if(!errors){
+    if(!sin_errors){
         showTree(syntaxTree, 0);
     }
 
@@ -405,7 +405,7 @@ int main(int argc, char **argv){
     return 0;
 }
 
-extern void yyerror(const char* error) {
+void yyerror(const char* error) {
     printf("\n%s [%d, %d]\n", error, line, col);
-    errors++;
+    sin_errors++;
 }

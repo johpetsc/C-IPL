@@ -14,10 +14,10 @@ int main(){
         writeln("literal");
         read(a);
     }
-    if(a <= b){
+    if(a && b || c){
         a = a * b;
-    }else if(b != a){
-        a = a + b;
+    }else if(b != 1 + a){
+        a = (a + b) * c / a - b;
     }else{
         a = a / b;
     }
