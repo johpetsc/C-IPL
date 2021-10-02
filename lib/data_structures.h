@@ -9,6 +9,7 @@ typedef struct symbol {
     int     line;
     int     col;
     int     scope;
+    int     params;
 } symbol;
 
 /*Node structure*/
@@ -18,6 +19,7 @@ typedef struct treeNode {
     struct treeNode*  subtree3;
     struct treeNode*  subtree4;
     char   value[100];
+    int    type;
 } treeNode;
 
 /*Symbol table*/
@@ -27,11 +29,15 @@ treeNode* treeNodes[10000];
 treeNode* syntaxTree;
 
 /*Symbol tables functions*/
-extern void newSymbol(symbol* identifier, char* id, char* type, char* declar, int line, int col, int scope);
+extern void newSymbol(symbol* identifier, char* id, char* type, char* declar, int line, int col, int scope, int params);
+extern int searchTable(symbol* identifier, char* id, int scope, int func, int declar);
+extern void updateParams(symbol* identifier, int params);
+extern int checkParams(symbol* identifier, char* id);
+extern int checkType(symbol* identifier, char* id);
 extern void showTable(symbol* identifier);
 
 /*Syntax tree functions*/
-extern treeNode* newNode(char* value);
+extern treeNode* newNode(char* value, int type);
 extern void showTree(treeNode* node, int deph);
 extern void destroyTree();
 
