@@ -1,47 +1,12 @@
-list IL;
-int list FL;
-
-list read_list(int n) {
-	int i;
-	i =  -435.7;
-	int float new;
-	new = NIL;
-	for (i = 0; i < n ; i = i + 1) {
-		int elem;
-		writeln("Digite o elemento da lista: ");
-		read(elem);
-		new = elem : new;
+int main(){
+	int list L1;
+	int a;
+	int c;
+	int a;
+	if(a == NIL){
+		a = a + c;
+	}else if(a + L1){
+		L1 = a : L1;
 	}
-	return new;
-}
-
-succ(int i) {
-	return i+1;
-}
-
-if main() 
-
-	writeln("Digite os número de elementos da lista: ");
-
-	int n;
-	float list FL10;
-	read(n);
-	
-	IL  = read_list(n);
-	FL = succ >> IL;
-
-	FL10 = leq_10 <<  FL;
-	if (FL10 != NIL) {
-		float list AUXL;
-		int n; n = 0;
-		for (AUXL=FL10; AUXL != NIL; AUXL = !AUXL) {
-			n = n + 1;
-			write(AUXL); write(" ");
-		}
-		writeln(" ");
-		write("A nova lista tem "); write(n); writeln(" elementos.");
-	}
-	else writeln("A nova lista não possui elementos.");
-
 	return 0;
 }

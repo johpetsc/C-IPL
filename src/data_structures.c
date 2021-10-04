@@ -23,12 +23,12 @@ extern void newSymbol(symbol* identifier, char* id, char* type, char* declar, in
 extern int searchTable(symbol* identifier, char* id, int scope, int func, int declar){
     if(func){
         for(int i = 0; i < table_size; i++){
-            if(!strcmp(identifier[i].id, id))
+            if(!strcmp(identifier[i].id, id) && (!strcmp(identifier[i].declar, "FUNC     ") || !strcmp(identifier[i].declar, "LIST FUNC")))
                 return 1;
         }
     }else if(declar){
         for(int i = 0; i < table_size; i++){
-            if((!strcmp(identifier[i].id, id)) && identifier[i].scope == scope)
+            if(!strcmp(identifier[i].id, id) && identifier[i].scope == scope && (!strcmp(identifier[i].declar, "VAR      ") || !strcmp(identifier[i].declar, "LIST VAR ")))
                 return 1;
         }
     }else{
@@ -78,12 +78,12 @@ extern int checkType(symbol* identifier, char* id){
 extern void showTable(symbol* identifier){
 
     printf("────────────────────────────────────────────────────────────────────\n");
-    printf("  Position | Scope |  Declaration | Symbol Type | Symbol ID   \n");
+    printf("   Position  | Scope |  Declaration |  Symbol Type  | Symbol ID   \n");
     printf("────────────────────────────────────────────────────────────────────\n");
 
     for(int i = 0; i < table_size; i++){
-        printf("    %d, %d   |   %d   |    %s  |     %s    |  %s  | %d\n", 
-                identifier[i].line, identifier[i].col, identifier[i].scope, identifier[i].declar, identifier[i].type, identifier[i].id, identifier[i].params);
+        printf("    %d, %d   |   %d   |    %s  |     %s    |  %s  \n", 
+                identifier[i].line, identifier[i].col, identifier[i].scope, identifier[i].declar, identifier[i].type, identifier[i].id);
         printf("────────────────────────────────────────────────────────────────────\n");
     }
     

@@ -4,8 +4,8 @@
 /*Symbol structure*/
 typedef struct symbol {
     char    id[200];
-    char    type[10];
-    char    declar[10];
+    char    type[100];
+    char    declar[100];
     int     line;
     int     col;
     int     scope;

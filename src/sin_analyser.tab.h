@@ -84,7 +84,7 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 27 "src/sin_analyser.y"
+#line 30 "src/sin_analyser.y"
 
     /*Token structure*/
     struct lexToken {

@@ -4,7 +4,7 @@ float list FL;
 
 int list read_list(int n) {
 	int i;
-	i =  -435.7;
+	i = -435.7;
 	int list new;
 	new = NIL;
 	for (i = 0; i < n ; i = i + 1) {
@@ -16,12 +16,12 @@ int list read_list(int n) {
 	return new;
 }
 
-float succ(int i) {
+float succ(int i, int l, int d) {
 	return i+1;
 }
 
 
-int leq_10(float x) {
+int leq_10(float x, int k) {
 	return x <= 10;
 }
 
@@ -37,7 +37,7 @@ int main() {
 	IL  = read_list(n);
 	FL = succ >> IL;
 
-	FL10 = leq_10 <<  FL;
+	FL10 = leq_10 << FL;
 	if (FL10 != NIL) {
 		float list AUXL;
 		int n; n = 0;

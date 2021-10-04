@@ -99,7 +99,7 @@ rest            .
 
 {dquot} {
     printf("\n%d:%d: ", line, col);
-    printf("ERROR: Literal not closed after ");
+    printf("LEXICAL ERROR: Literal not closed after ");
     printf("%s.", yytext);
     col++;
     lex_errors++;
@@ -301,7 +301,7 @@ rest            .
 
 {rest}  {
     printf("\n%d:%d: ", line, col);
-    printf("ERROR: '%s' ", yytext);
+    printf("LEXICAL ERROR: '%s' ", yytext);
     printf("is not part of the C-IPL language.");
     lex_errors++;
     col++;

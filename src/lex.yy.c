@@ -857,7 +857,7 @@ YY_RULE_SETUP
 #line 100 "src/lex_analyser.l"
 {
     printf("\n%d:%d: ", line, col);
-    printf("ERROR: Literal not closed after ");
+    printf("LEXICAL ERROR: Literal not closed after ");
     printf("%s.", yytext);
     col++;
     lex_errors++;
@@ -1113,7 +1113,7 @@ YY_RULE_SETUP
 #line 302 "src/lex_analyser.l"
 {
     printf("\n%d:%d: ", line, col);
-    printf("ERROR: '%s' ", yytext);
+    printf("LEXICAL ERROR: '%s' ", yytext);
     printf("is not part of the C-IPL language.");
     lex_errors++;
     col++;
