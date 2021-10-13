@@ -856,9 +856,9 @@ case 7:
 YY_RULE_SETUP
 #line 100 "src/lex_analyser.l"
 {
-    printf("\n%d:%d: ", line, col);
+    printf("%d:%d: ", line, col);
     printf("LEXICAL ERROR: Literal not closed after ");
-    printf("%s.", yytext);
+    printf("%s.\n", yytext);
     col++;
     lex_errors++;
 }
@@ -932,13 +932,12 @@ YY_RULE_SETUP
     // printf("⟨logicOp, ");
     // printf("%s⟩", yytext);
     col = col + yyleng;
-    if(!strcmp(yytext, "!")) return RLOG_OP;
-    else return LLOG_OP;
+    return LLOG_OP;
 }
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 166 "src/lex_analyser.l"
+#line 165 "src/lex_analyser.l"
 {
     yylval.lex.line = line;
     yylval.lex.col = col;
@@ -952,7 +951,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 177 "src/lex_analyser.l"
+#line 176 "src/lex_analyser.l"
 {
     yylval.lex.line = line;
     yylval.lex.col = col;
@@ -966,7 +965,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 188 "src/lex_analyser.l"
+#line 187 "src/lex_analyser.l"
 {
     yylval.lex.line = line;
     yylval.lex.col = col;
@@ -980,7 +979,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 199 "src/lex_analyser.l"
+#line 198 "src/lex_analyser.l"
 {
     yylval.lex.line = line;
     yylval.lex.col = col;
@@ -994,7 +993,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 210 "src/lex_analyser.l"
+#line 209 "src/lex_analyser.l"
 {
     yylval.lex.line = line;
     yylval.lex.col = col;
@@ -1008,7 +1007,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 221 "src/lex_analyser.l"
+#line 220 "src/lex_analyser.l"
 {
     yylval.lex.line = line;
     yylval.lex.col = col;
@@ -1023,7 +1022,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 233 "src/lex_analyser.l"
+#line 232 "src/lex_analyser.l"
 {
     yylval.lex.line = line;
     yylval.lex.col = col;
@@ -1037,7 +1036,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 244 "src/lex_analyser.l"
+#line 243 "src/lex_analyser.l"
 {
     yylval.lex.line = line;
     yylval.lex.col = col;
@@ -1051,7 +1050,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 255 "src/lex_analyser.l"
+#line 254 "src/lex_analyser.l"
 {
     yylval.lex.line = line;
     yylval.lex.col = col;
@@ -1065,7 +1064,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 266 "src/lex_analyser.l"
+#line 265 "src/lex_analyser.l"
 {
     yylval.lex.line = line;
     yylval.lex.col = col;
@@ -1082,7 +1081,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 280 "src/lex_analyser.l"
+#line 279 "src/lex_analyser.l"
 {
     yylval.lex.line = line;
     yylval.lex.col = col;
@@ -1096,7 +1095,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 291 "src/lex_analyser.l"
+#line 290 "src/lex_analyser.l"
 {
     yylval.lex.line = line;
     yylval.lex.col = col;
@@ -1110,21 +1109,21 @@ YY_RULE_SETUP
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 302 "src/lex_analyser.l"
+#line 301 "src/lex_analyser.l"
 {
-    printf("\n%d:%d: ", line, col);
+    printf("%d:%d: ", line, col);
     printf("LEXICAL ERROR: '%s' ", yytext);
-    printf("is not part of the C-IPL language.");
+    printf("is not part of the C-IPL language.\n");
     lex_errors++;
     col++;
 }
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 309 "src/lex_analyser.l"
+#line 308 "src/lex_analyser.l"
 ECHO;
 	YY_BREAK
-#line 1128 "src/lex.yy.c"
+#line 1127 "src/lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -2092,5 +2091,5 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 309 "src/lex_analyser.l"
+#line 308 "src/lex_analyser.l"
 

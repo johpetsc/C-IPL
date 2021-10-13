@@ -23,8 +23,10 @@ extern void newSymbol(symbol* identifier, char* id, char* type, char* declar, in
 extern int searchTable(symbol* identifier, char* id, int scope, int func, int declar){
     if(func){
         for(int i = 0; i < table_size; i++){
-            if(!strcmp(identifier[i].id, id) && (!strcmp(identifier[i].declar, "FUNC     ") || !strcmp(identifier[i].declar, "LIST FUNC")))
-                return 1;
+            if(!strcmp(identifier[i].id, id) && (!strcmp(identifier[i].declar, "FUNC     ") || !strcmp(identifier[i].declar, "LIST FUNC"))){
+                if(i+1 == table_size) return identifier[i].scope+1;
+                else return identifier[i+1].scope+1;
+            }     
         }
     }else if(declar){
         for(int i = 0; i < table_size; i++){
@@ -50,17 +52,9 @@ extern int checkParams(symbol* identifier, char* id){
     return 0;
 }
 
-extern void updateParams(symbol* identifier, int params){
+extern int checkParamType(symbol* identifier, int param, int scope){
     for(int i = 0; i < table_size; i++){
-        if(identifier[i].params == -1){
-            identifier[i].params = params;
-        }
-    }
-}
-
-extern int checkType(symbol* identifier, char* id){
-    for(int i = 0; i < table_size; i++){
-        if(!strcmp(identifier[i].id, id)){
+        if(identifier[i].scope == scope && identifier[i].params == param){
             if(!strcmp(identifier[i].type, "int"))
                 return 1;
             else if(!strcmp(identifier[i].type, "float"))
@@ -70,6 +64,59 @@ extern int checkType(symbol* identifier, char* id){
             else if(!strcmp(identifier[i].type, "float list"))
                 return 4;
         }
+    }
+
+    return 0;
+}
+
+extern void updateParams(symbol* identifier, int params){
+    for(int i = 0; i < table_size; i++){
+        if(identifier[i].params == -1){
+            identifier[i].params = params;
+        }
+    }
+}
+
+extern int checkType(symbol* identifier, char* id, int scope, int check_scope){
+     if(check_scope){
+        for(int i = 0; i < table_size; i++){
+            if(!strcmp(identifier[i].id, id) && identifier[i].scope == scope){
+                if(!strcmp(identifier[i].type, "int"))
+                    return 1;
+                else if(!strcmp(identifier[i].type, "float"))
+                    return 2;
+                else if(!strcmp(identifier[i].type, "int list"))
+                    return 3;
+                else if(!strcmp(identifier[i].type, "float list"))
+                    return 4;
+            }
+        }
+        for(int i = 0; i < table_size; i++){
+            if(!strcmp(identifier[i].id, id)){
+                if(!strcmp(identifier[i].type, "int"))
+                    return 1;
+                else if(!strcmp(identifier[i].type, "float"))
+                    return 2;
+                else if(!strcmp(identifier[i].type, "int list"))
+                    return 3;
+                else if(!strcmp(identifier[i].type, "float list"))
+                    return 4;
+            }
+        }
+    }else{
+        for(int i = 0; i < table_size; i++){
+            if(!strcmp(identifier[i].id, id)){
+                if(!strcmp(identifier[i].type, "int"))
+                    return 1;
+                else if(!strcmp(identifier[i].type, "float"))
+                    return 2;
+                else if(!strcmp(identifier[i].type, "int list"))
+                    return 3;
+                else if(!strcmp(identifier[i].type, "float list"))
+                    return 4;
+            }
+        }
+        
     }
     return 0;
 }
@@ -82,8 +129,8 @@ extern void showTable(symbol* identifier){
     printf("────────────────────────────────────────────────────────────────────\n");
 
     for(int i = 0; i < table_size; i++){
-        printf("    %d, %d   |   %d   |    %s  |     %s    |  %s  \n", 
-                identifier[i].line, identifier[i].col, identifier[i].scope, identifier[i].declar, identifier[i].type, identifier[i].id);
+        printf("    %d, %d   |   %d   |    %s  |     %s    |  %s  |  %d\n", 
+                identifier[i].line, identifier[i].col, identifier[i].scope, identifier[i].declar, identifier[i].type, identifier[i].id, identifier[i].params);
         printf("────────────────────────────────────────────────────────────────────\n");
     }
     

@@ -63,20 +63,19 @@ extern int yydebug;
     SS_OP = 269,
     MD_OP = 270,
     LLOG_OP = 271,
-    RLOG_OP = 272,
-    REL_OP = 273,
-    ASS_OP = 274,
-    LIST_FUNC = 275,
-    NIL = 276,
-    LLIST_OP = 277,
-    RLIST_OP = 278,
-    LITERAL = 279,
-    LB = 280,
-    RB = 281,
-    LP = 282,
-    RP = 283,
-    END = 284,
-    SEPARATOR = 285
+    REL_OP = 272,
+    ASS_OP = 273,
+    LIST_FUNC = 274,
+    NIL = 275,
+    LLIST_OP = 276,
+    RLIST_OP = 277,
+    LITERAL = 278,
+    LB = 279,
+    RB = 280,
+    LP = 281,
+    RP = 282,
+    END = 283,
+    SEPARATOR = 284
   };
 #endif
 
@@ -84,7 +83,7 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 30 "src/sin_analyser.y"
+#line 32 "src/sin_analyser.y"
 
     /*Token structure*/
     struct lexToken {
@@ -95,7 +94,7 @@ union YYSTYPE
     /*Tree node reference*/
     struct treeNode* treeNode;
 
-#line 99 "src/sin_analyser.tab.h"
+#line 98 "src/sin_analyser.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

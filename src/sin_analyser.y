@@ -21,6 +21,8 @@
     int scope = 0;
     int params = 0;
     int args_ret = 0;
+    int call_scope;
+    int param_error = 0;
     int args = 0;
     int main_found = 0;
     int sin_errors = 0;
@@ -42,7 +44,7 @@
 %token <lex> INT FLOAT TYPE ID LIST
 %token <lex> IF ELSE FOR RETURN OUT IN
 %token <lex> SS_OP MD_OP
-%token <lex> LLOG_OP RLOG_OP
+%token <lex> LLOG_OP
 %token <lex> REL_OP ASS_OP
 %token <lex> LIST_FUNC NIL LLIST_OP RLIST_OP
 %token <lex> LITERAL
@@ -51,22 +53,21 @@
 /*Precedences*/
 %left SS_OP
 %left MD_OP
-%left LLOG_OP 
-%right LIST_FUNC
+%left LIST_FUNC
 %right RLIST_OP
 %right LLIST_OP
-%right RLOG_OP
+%right LLOG_OP 
 %right ELSE
 
 /*Grammar types*/
 %type <treeNode> start
 %type <treeNode> program program_block
-%type <treeNode> declar func_dclr params func
+%type <treeNode> declar func_dclr params func param
 %type <treeNode> block statement expr operation val
 %type <treeNode> flow_ctr if_else for return
 %type <treeNode> ass_op ulog_op log_op rel_op ari_op md_op
 %type <treeNode> input output
-%type <treeNode> list_op list_con list_oper list_func
+%type <treeNode> list_op
 %type <treeNode> id
 %type <treeNode> func_call func_params
 
@@ -187,16 +188,28 @@ func_dclr:
 ;
 
 params:
-    params SEPARATOR declar {
+    params SEPARATOR param {
         params++;
         $$ = newNode("PARAMS", 0);
         $$->subtree1 = $1;
         $$->subtree2 = $3;
     }
     |
-    declar { 
+    param { 
         params++;
         $$ = $1;
+    }
+;
+
+param:
+    TYPE ID {
+        newSymbol(table, $2.id, $1.id, "PAR      ", $2.line, $2.col, stack[scope_pos], params+1);   
+        $$ = newNode(strcat(strcat($1.id," var "), $2.id), checkType(table, $2.id, stack[scope_pos], 1));
+    }
+    |
+    TYPE LIST ID {
+        newSymbol(table, $3.id, strcat($1.id," list"), "LIST PAR ",$3.line, $3.col, stack[scope_pos], params+1);
+        $$ = newNode(strcat(strcat($1.id," "), $3.id), checkType(table, $3.id, stack[scope_pos], 1));
     }
 ;
 
@@ -207,7 +220,7 @@ declar:
             sem_errors++;
         }
         newSymbol(table, $2.id, $1.id, "VAR      ", $2.line, $2.col, stack[scope_pos], 0);   
-        $$ = newNode(strcat(strcat($1.id," var "), $2.id), checkType(table, $2.id));
+        $$ = newNode(strcat(strcat($1.id," var "), $2.id), checkType(table, $2.id, stack[scope_pos], 1));
     }
     |
     TYPE LIST ID {
@@ -216,7 +229,7 @@ declar:
             sem_errors++;
         }
         newSymbol(table, $3.id, strcat($1.id," list"), "LIST VAR ",$3.line, $3.col, stack[scope_pos], 0);
-        $$ = newNode(strcat(strcat($1.id," "), $3.id), checkType(table, $3.id));
+        $$ = newNode(strcat(strcat($1.id," "), $3.id), checkType(table, $3.id, stack[scope_pos], 1));
     }
 ;
 
@@ -228,7 +241,7 @@ func:
             sem_errors++;
         }
         newSymbol(table, $2.id, $1.id, "FUNC     ", $2.line, $2.col, stack[scope_pos], -1);
-        $$ = newNode(strcat(strcat($1.id," function "), $2.id), checkType(table, $2.id));
+        $$ = newNode(strcat(strcat($1.id," function "), $2.id), checkType(table, $2.id, stack[scope_pos], 1));
     }
     |
     TYPE LIST ID {
@@ -238,7 +251,7 @@ func:
             sem_errors++;
         }
         newSymbol(table, $3.id, strcat($1.id," list"), "LIST FUNC", $3.line, $3.col, scope, -1);
-        $$ = newNode(strcat(strcat($1.id," function list "), $3.id), checkType(table, $3.id));
+        $$ = newNode(strcat(strcat($1.id," function list "), $3.id), checkType(table, $3.id, stack[scope_pos], 1));
     }
 ;
 
@@ -286,16 +299,6 @@ expr:
     input { $$ = $1; }
     |
     output { $$ = $1; }
-    |
-    list_op { $$ = $1; }
-    |
-    list_func { $$ = $1; }
-;
-
-list_op:
-    list_con { $$ = $1; }
-    |
-    list_oper { $$ = $1; }
 ;
 
 if_else:
@@ -303,6 +306,7 @@ if_else:
         $$ = newNode("IF", 0);
         $$->subtree1 = $3;
         $$->subtree2 = $5;
+        $$->type = $$->subtree2->type;
     }
     | 
     IF LP operation RP statement ELSE statement {
@@ -310,6 +314,7 @@ if_else:
         $$->subtree1 = $3;
         $$->subtree2 = $5;
         $$->subtree3 = $7;
+        $$->type = $$->subtree3->type;
     }
 ;
 
@@ -320,11 +325,12 @@ for:
         $$->subtree2 = $5;
         $$->subtree3 = $7;
         $$->subtree4 = $9;
+        $$->type = $$->subtree4->type;
     }
 ;
 
 return:
-    RETURN expr {
+    RETURN operation {
         $$ = newNode("RETURN", 0);
         $$->subtree1 = $2;
         $$->type = $$->subtree1->type;
@@ -332,7 +338,7 @@ return:
 ;
 
 ass_op:
-    id ASS_OP expr {
+    id ASS_OP operation {
         $$ = newNode("ASSIGN", 0);
         $$->subtree1 = $1;
         $$->subtree2 = $3;
@@ -374,59 +380,8 @@ ass_op:
     }
 ;
 
-list_con:
-    expr RLIST_OP expr {
-        $$ = newNode("LIST OP", 0);
-        $$->subtree1 = $1;
-        $$->subtree2 = $3;
-        if($$->subtree1->type == 1 || $$->subtree1->type == 2){
-            if($$->subtree2->type == 3 || $$->subtree2->type == 4){
-                $$->type = $$->subtree2->type;
-            }else{
-                printf("SEMANTIC ERROR: Type error in list constructor with type %d and %d. [%d, %d]\n", $$->subtree1->type, $$->subtree2->type, $2.line, $2.col);
-                sem_errors++;
-            }
-        } else{
-            printf("SEMANTIC ERROR: Type error in list constructor with type %d and %d. [%d, %d]\n", $$->subtree1->type, $$->subtree2->type, $2.line, $2.col);
-            sem_errors++;
-        }
-    }
-;
-
-list_oper:
-    LLIST_OP expr {
-        $$ = newNode("LIST OP", 0);
-        $$->subtree1 = $2;
-        if($$->subtree1->type == 3 || $$->subtree1->type == 4){
-            $$->type = $$->subtree1->type;
-        } else{
-            printf("SEMANTIC ERROR: Type error in list operator with type %d. [%d, %d]\n", $$->subtree1->type, $1.line, $1.col);
-            sem_errors++;
-        }
-    }
-;
-
-list_func:
-    expr LIST_FUNC expr {
-        $$ = newNode("LIST FUNC", 0);
-        $$->subtree1 = $1;
-        $$->subtree2 = $3;
-        if($$->subtree1->type == 1 || $$->subtree1->type == 2){
-            if($$->subtree2->type == 3 || $$->subtree2->type == 4){
-                $$->type = $$->subtree2->type;
-            }else{
-                printf("SEMANTIC ERROR: Type error in list function with type %d and %d. [%d, %d]\n", $$->subtree1->type, $$->subtree2->type, $2.line, $2.col);
-                sem_errors++;
-            }
-        } else{
-            printf("SEMANTIC ERROR: Type error in list function with type %d and %d. [%d, %d]\n", $$->subtree1->type, $$->subtree2->type, $2.line, $2.col);
-            sem_errors++;
-        }
-    }
-;
-
 operation:
-    ulog_op { $$ = $1; }
+    log_op { $$ = $1; }
 ;
 
 input:
@@ -437,29 +392,10 @@ input:
 ;
 
 output:
-    OUT LP val RP {
-        $$ = newNode("OUT", 0);
-        $$->subtree1 = $3;
-    }
-    |
-    OUT LP list_oper RP { 
+    OUT LP operation RP { 
         $$ = newNode("OUT", 0);
         $$->subtree1 = $3; 
     }
-;
-
-ulog_op:
-    RLOG_OP log_op {
-        $$ = newNode("LOG OP", 0);
-        $$->subtree1 = $2;
-        if($$->subtree1->type != 1 && $$->subtree1->type != 2){
-            printf("SEMANTIC ERROR: Type error in logical operation with type %d. [%d, %d]\n", $$->subtree1->type, $1.line, $1.col);
-            sem_errors++;
-        }
-        else $$->type = 1;
-    }
-    | 
-    log_op { $$ = $1; }
 ;
 
 log_op:
@@ -527,6 +463,44 @@ rel_op:
         }
     }
     | 
+    list_op { $$ = $1; }
+;
+
+list_op:
+    list_op LIST_FUNC ari_op {
+        $$ = newNode("LIST FUNC", 0);
+        $$->subtree1 = $1;
+        $$->subtree2 = $3;
+        if($$->subtree1->type == 1 || $$->subtree1->type == 2){
+            if($$->subtree2->type == 3 || $$->subtree2->type == 4){
+                $$->type = $$->subtree2->type;
+            }else{
+                printf("SEMANTIC ERROR: Type error in list function with type %d and %d. [%d, %d]\n", $$->subtree1->type, $$->subtree2->type, $2.line, $2.col);
+                sem_errors++;
+            }
+        } else{
+            printf("SEMANTIC ERROR: Type error in list function with type %d and %d. [%d, %d]\n", $$->subtree1->type, $$->subtree2->type, $2.line, $2.col);
+            sem_errors++;
+        }
+    }
+    |
+    list_op RLIST_OP ari_op {
+        $$ = newNode("LIST OP", 0);
+        $$->subtree1 = $1;
+        $$->subtree2 = $3;
+        if($$->subtree1->type == 1 || $$->subtree1->type == 2){
+            if($$->subtree2->type == 3 || $$->subtree2->type == 4){
+                $$->type = $$->subtree2->type;
+            }else{
+                printf("SEMANTIC ERROR: Type error in list constructor with type %d and %d. [%d, %d]\n", $$->subtree1->type, $$->subtree2->type, $2.line, $2.col);
+                sem_errors++;
+            }
+        } else{
+            printf("SEMANTIC ERROR: Type error in list constructor with type %d and %d. [%d, %d]\n", $$->subtree1->type, $$->subtree2->type, $2.line, $2.col);
+            sem_errors++;
+        }
+    }
+    |
     ari_op { $$ = $1; }
 ;
 
@@ -563,7 +537,7 @@ ari_op:
 ;
 
 md_op:
-    md_op MD_OP val {
+    md_op MD_OP ulog_op {
         $$ = newNode("ARI MD OP", 0);
         $$->subtree1 = $1;
         $$->subtree2 = $3;
@@ -602,6 +576,21 @@ md_op:
         }
     }
     | 
+    ulog_op { $$ = $1; }
+;
+
+ulog_op:
+    LLIST_OP ulog_op {
+        $$ = newNode("UNARY OP", 0);
+        $$->subtree1 = $2;
+        if($$->subtree1->type != 0){
+            $$->type = $$->subtree1->type;
+        } else{
+            printf("SEMANTIC ERROR: Type error in list operator with type %d. [%d, %d]\n", $$->subtree1->type, $1.line, $1.col);
+            sem_errors++;
+        }
+    }
+    | 
     val { $$ = $1; }
 ;
 
@@ -622,17 +611,23 @@ val:
 ;
 
 func_call:
-    ID LP func_params RP {
-        if(!searchTable(table, $1.id, scope, 1, 1)){
-            printf("SEMANTIC ERROR: Function %s not declared [%d, %d]\n", $1.id, $1.line, $1.col);
+    ID LP {
+        call_scope = searchTable(table, $1.id, scope, 1, 1);
+    } func_params RP {
+        if(!call_scope){
+            printf("SEMANTIC ERROR: Function '%s' not declared [%d, %d]\n", $1.id, $1.line, $1.col);
             sem_errors++;
         }else if(checkParams(table, $1.id) != args){
-            printf("SEMANTIC ERROR: Function %s calls for different number of arguments [%d, %d]\n", $1.id, $1.line, $1.col);
+            printf("SEMANTIC ERROR: Function '%s' calls for different number of arguments [%d, %d]\n", $1.id, $1.line, $1.col);
+            sem_errors++;
+        }else if(param_error){
+            printf("SEMANTIC ERROR: Function '%s' incorrect parameter type [%d, %d]\n", $1.id, $2.line, $2.col);
+            param_error = 0;
             sem_errors++;
         }
         args = 0;
-        $$ = newNode("CALL", checkType(table, $1.id));
-        $$->subtree2 = $3;
+        $$ = newNode("CALL", checkType(table, $1.id, stack[scope_pos], 0));
+        $$->subtree2 = $4;
     }
     | 
     ID LP RP {
@@ -644,7 +639,7 @@ func_call:
             sem_errors++;
         }
         args = 0;
-        $$ = newNode("CALL", checkType(table, $1.id));
+        $$ = newNode("CALL", checkType(table, $1.id, stack[scope_pos], 0));
     }
 ;
 
@@ -654,21 +649,28 @@ id:
             printf("SEMANTIC ERROR: Variable %s not declared [%d, %d]\n", $1.id, $1.line, $1.col);
             sem_errors++;
         }
-        $$ = newNode($1.id, checkType(table, $1.id)); 
+        $$ = newNode($1.id, checkType(table, $1.id, stack[scope_pos], 1)); 
     }
 ;
 
 func_params: 
-    func_params SEPARATOR expr{
+    func_params SEPARATOR operation{
         args++;
         $$ = newNode("PARAMS", 0);
         $$->subtree1 = $1;
         $$->subtree2 = $3;
+        if($$->subtree2->type != checkParamType(table, args, call_scope-1))
+            param_error = 1;
+        // printf("asub type: %d, check type: %d, args: %d, call: %d\n", $$->subtree2->type, checkParamType(table, args, call_scope-1), args, call_scope);
     }
     | 
-    expr { 
+    operation { 
         args++;
-        $$ = $1; 
+        $$ = newNode("PARAMS", 0);
+        $$->subtree1 = $1;
+        if($$->subtree1->type != checkParamType(table, args, call_scope-1))
+            param_error = 1;
+        // printf("bsub type: %d, check type: %d, args: %d, call: %d\n", $$->subtree1->type, checkParamType(table, args, call_scope-1), args, call_scope);
     }
 ;
 

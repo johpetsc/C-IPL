@@ -29,7 +29,7 @@ list_func       [<]{2}|[>]{2}
 nil             NIL
 /*Definitions for operators*/
 ari_op          [+*/-]
-log_op          [!]|[&]{2}|[|]{2}
+log_op          [&]{2}|[|]{2}
 rel_op          [>]|[<]|(>=)|(<=)|(==)|(!=)
 ass_op          (=)
 /*Definitions for I/O*/
@@ -98,9 +98,9 @@ rest            .
 }
 
 {dquot} {
-    printf("\n%d:%d: ", line, col);
+    printf("%d:%d: ", line, col);
     printf("LEXICAL ERROR: Literal not closed after ");
-    printf("%s.", yytext);
+    printf("%s.\n", yytext);
     col++;
     lex_errors++;
 }
@@ -159,8 +159,7 @@ rest            .
     // printf("⟨logicOp, ");
     // printf("%s⟩", yytext);
     col = col + yyleng;
-    if(!strcmp(yytext, "!")) return RLOG_OP;
-    else return LLOG_OP;
+    return LLOG_OP;
 }
 
 {rel_op}    {
@@ -300,9 +299,9 @@ rest            .
 }
 
 {rest}  {
-    printf("\n%d:%d: ", line, col);
+    printf("%d:%d: ", line, col);
     printf("LEXICAL ERROR: '%s' ", yytext);
-    printf("is not part of the C-IPL language.");
+    printf("is not part of the C-IPL language.\n");
     lex_errors++;
     col++;
 }

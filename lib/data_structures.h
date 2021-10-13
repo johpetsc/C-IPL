@@ -32,8 +32,9 @@ treeNode* syntaxTree;
 extern void newSymbol(symbol* identifier, char* id, char* type, char* declar, int line, int col, int scope, int params);
 extern int searchTable(symbol* identifier, char* id, int scope, int func, int declar);
 extern void updateParams(symbol* identifier, int params);
+extern int checkParamType(symbol* identifier, int param, int scope);
 extern int checkParams(symbol* identifier, char* id);
-extern int checkType(symbol* identifier, char* id);
+extern int checkType(symbol* identifier, char* id, int scope, int check_scope);
 extern void showTable(symbol* identifier);
 
 /*Syntax tree functions*/
