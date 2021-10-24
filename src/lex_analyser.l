@@ -125,7 +125,7 @@ rest            .
     // printf("%s⟩", yytext);
     col++;
     if(!strcmp(yytext, ":")) return RLIST_OP;
-    else return LLIST_OP;
+    else return UN_OP;
 }
 
 {list_func} {

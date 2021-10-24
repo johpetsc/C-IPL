@@ -1,6 +1,3 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include "../lib/data_structures.h"
 
 /*Stores symbol table and tree size*/
@@ -8,7 +5,7 @@ int table_size = 0;
 int tree_size = 0;
 
 /*Creates new symbol in symbol table*/
-extern void newSymbol(symbol* identifier, char* id, char* type, char* declar, int line, int col, int scope, int params){
+extern void newSymbol(symbol* identifier, char* id, char* type, char* declar, int line, int col, int scope, int params, int reg){
     strcpy(identifier[table_size].id, id);
     strcpy(identifier[table_size].type, type);
     strcpy(identifier[table_size].declar, declar);
@@ -16,11 +13,12 @@ extern void newSymbol(symbol* identifier, char* id, char* type, char* declar, in
     identifier[table_size].col = col;
     identifier[table_size].scope = scope;
     identifier[table_size].params = params;
+    identifier[table_size].reg = reg;
 
     table_size++;
 }
 
-extern int searchTable(symbol* identifier, char* id, int scope, int func, int declar){
+extern int searchTable(symbol* identifier, char* id, int func, int declar, int stack[], int scope_pos){
     if(func){
         for(int i = 0; i < table_size; i++){
             if(!strcmp(identifier[i].id, id) && (!strcmp(identifier[i].declar, "FUNC     ") || !strcmp(identifier[i].declar, "LIST FUNC"))){
@@ -30,13 +28,17 @@ extern int searchTable(symbol* identifier, char* id, int scope, int func, int de
         }
     }else if(declar){
         for(int i = 0; i < table_size; i++){
-            if(!strcmp(identifier[i].id, id) && identifier[i].scope == scope && (!strcmp(identifier[i].declar, "VAR      ") || !strcmp(identifier[i].declar, "LIST VAR ")))
+            if(!strcmp(identifier[i].id, id) && identifier[i].scope == stack[scope_pos] && (!strcmp(identifier[i].declar, "VAR      ") || !strcmp(identifier[i].declar, "LIST VAR ")))
                 return 1;
         }
     }else{
         for(int i = 0; i < table_size; i++){
-            if((!strcmp(identifier[i].id, id)) && identifier[i].scope <= scope)
-                return 1;
+            if(!strcmp(identifier[i].id, id)){
+                for(int j = 0; j<= scope_pos; j++){
+                    if(identifier[i].scope == stack[j])
+                        return 1;
+                }
+            }
         }
     }
 
@@ -137,7 +139,7 @@ extern void showTable(symbol* identifier){
 }
 
 /*Creates new node in tree*/
-extern treeNode* newNode(char* value, int type){
+extern treeNode* newNode(char* value, int type, char* tac){
     treeNode* node = (treeNode*)malloc(sizeof(treeNode));
 
     node->subtree1 = NULL;
@@ -147,6 +149,7 @@ extern treeNode* newNode(char* value, int type){
     
     strcpy(node->value, value);
     node->type = type;
+    strcpy(node->tac, tac);
 
     treeNodes[tree_size] = node;
    

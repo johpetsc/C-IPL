@@ -889,7 +889,7 @@ YY_RULE_SETUP
     // printf("%s⟩", yytext);
     col++;
     if(!strcmp(yytext, ":")) return RLIST_OP;
-    else return LLIST_OP;
+    else return UN_OP;
 }
 	YY_BREAK
 case 10:

@@ -1,11 +1,17 @@
-int aux(int a, float b){
-    return 1;
+int a;
+
+int sin(int a, float b){
+    read();
+    write(a);
+    return ;
 }
 
-int not_main(){
-    int a;
-    aux(a);
+int sem(){
+    int b;
 
-    return 1.5;
+    a = a + b;
+    sin(a);
+
+    return 1;
 
 }

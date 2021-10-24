@@ -38,7 +38,7 @@ int main() {
 	FL = succ >> IL;
 
 	FL10 = leq_10 << FL;
-	if (FL10 != NIL) {
+	if (FL10 != NIL && (FL10 == NIL)) {
 		float list AUXL;
 		int n; n = 0;
 		for (AUXL=FL10; AUXL != NIL; AUXL = !AUXL) {

@@ -67,7 +67,7 @@ extern int yydebug;
     ASS_OP = 273,
     LIST_FUNC = 274,
     NIL = 275,
-    LLIST_OP = 276,
+    UN_OP = 276,
     RLIST_OP = 277,
     LITERAL = 278,
     LB = 279,
@@ -83,7 +83,7 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 32 "src/sin_analyser.y"
+#line 42 "src/sin_analyser.y"
 
     /*Token structure*/
     struct lexToken {
