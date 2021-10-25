@@ -1,26 +1,33 @@
-int test(int a, int b){
-    if(a > b){
-        writeln(a);
-    }
-    return 0;
-}
-
 int main(){ 
     int a;
-    int b;
     int c;
+    writeln("Este programa testa operações aritméticas e relacionais.");
     write("Insira um valor: ");
     read(a);
-    int d;
-    d = a > 0;
-    write(d);
-    b = 5;
-    c = -1;
-    c = a * (b - c);
-    write("Resultado: ");
+    write("Multiplicado por 2: ");
+    c = a * 2;
+    writeln(c);
+    write("Dividido por 2: ");
+    c = a / 2;
+    writeln(c);
+    write("Somando 2: ");
+    c = a + 2;
+    writeln(c);
+    write("Subtraindo 2: ");
+    c = a - 2;
+    writeln(c);
+    write("Negativo: ");
+    c = -a;
+    writeln(c);
+    write("Maior que 10?: ");
+    c = a>10;
+    writeln(c);
+    write("Menor que 10?: ");
+    c = a<10;
+    writeln(c);
+    write("Igual a 10?: ");
+    c = a==10;
     writeln(c);
 
-    test(a, b);
-
-    return b;
+    return 0;
 }

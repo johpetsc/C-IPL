@@ -18,8 +18,9 @@
     extern void changeScope(int op);
     extern FILE *yyin;
     int stack[100];
-    char tacTable[1000];
-    char tacCode[1000];
+    char tacTable[10000];
+    char tacCode[100000];
+    char tacFile[100];
     int reg = 0;
     int str = 0;
     int loop = 0;
@@ -33,6 +34,11 @@
     char reg_num[5];
     char str_num[5];
     char loop_num[5];
+    char for_loop[5];
+    char if_loop[5];
+    char else_loop[5];
+    char end_loop[5];
+    char finish_loop[5];
     char tac[100];
     int main_found = 0;
     int sin_errors = 0;
@@ -73,7 +79,7 @@
 %type <treeNode> start
 %type <treeNode> program program_block
 %type <treeNode> declar func_dclr params func param
-%type <treeNode> block statement expr operation val
+%type <treeNode> block statement if_statement expr operation val
 %type <treeNode> flow_ctr if_else for return
 %type <treeNode> ass_op un_op log_op rel_op ari_op md_op
 %type <treeNode> input output
@@ -346,38 +352,100 @@ expr:
     output { $$ = $1; }
 ;
 
-if_else:
-    IF LP operation RP statement %prec ELSE {
-        $$ = newNode("IF", 0, " ");
-        $$->subtree1 = $3;
-        // loop_num[0] = 'L';
-        // loop_num[1] = loop + '0';
-        // loop++;
-        // strcat(tacCode, "brz ");
-        // strcat(tacCode, loop_num);
-        // strcat(tacCode, ", ");
-        // strcat(tacCode, "\n");
-        $$->subtree2 = $5;
-        $$->type = $$->subtree2->type;
+if_statement:
+    expr END { $$ = $1; }
+    |
+    ass_op END{ $$ = $1; }
+    |
+    LB {
+        sprintf(if_loop, "L%d", loop);
+        loop++;
+        sprintf(end_loop, "L%d", loop);
+        loop++;
+        strcat(tacCode, "jump ");
+        strcat(tacCode, end_loop);
+        strcat(tacCode, "\n");
+        strcat(tacCode, if_loop);
+        strcat(tacCode, ":\n");
+        strcat(tacCode, "not ");
+        strcat(tacCode, reg_num);
+        strcat(tacCode, ", ");
+        strcat(tacCode, reg_num);
+        strcat(tacCode, "\n");
+        changeScope(1);
+    } block RB { 
+        $$ = $3;
+        changeScope(0);
     }
     | 
-    IF LP operation RP statement ELSE statement {
+    flow_ctr { $$ = $1; }
+;
+
+if_else:
+    IF LP operation RP if_statement %prec ELSE {
+        $$ = newNode("IF", 0, " ");
+        $$->subtree1 = $3;
+        $$->subtree2 = $5;
+        $$->type = $$->subtree2->type;
+        strcat(tacCode, end_loop);
+        strcat(tacCode, ":\nbrnz ");
+        strcat(tacCode, if_loop);
+        strcat(tacCode, ", ");
+        strcat(tacCode, $$->subtree1->tac);
+        strcat(tacCode, "\n");
+    }
+    | 
+    IF LP operation RP if_statement ELSE {
+        sprintf(else_loop, "L%d", loop);
+        loop++;
+        sprintf(finish_loop, "L%d", loop);
+        loop++;
+        strcat(tacCode, "jump ");
+        strcat(tacCode, finish_loop);
+        strcat(tacCode, "\n");
+        strcat(tacCode, else_loop);
+        strcat(tacCode, ":\n");
+    } statement {
         $$ = newNode("IF ELSE", 0, " ");
         $$->subtree1 = $3;
         $$->subtree2 = $5;
-        $$->subtree3 = $7;
+        $$->subtree3 = $8;
         $$->type = $$->subtree3->type;
+        strcat(tacCode, "jump ");
+        strcat(tacCode, finish_loop);
+        strcat(tacCode, "\n");
+        strcat(tacCode, end_loop);
+        strcat(tacCode, ":\nbrnz ");
+        strcat(tacCode, if_loop);
+        strcat(tacCode, ", ");
+        strcat(tacCode, $$->subtree1->tac);
+        strcat(tacCode, "\n");
+        strcat(tacCode, "jump ");
+        strcat(tacCode, else_loop);
+        strcat(tacCode, "\n");
+        strcat(tacCode, finish_loop);
+        strcat(tacCode, ":\n");
     }
 ;
 
 for:
-    FOR LP ass_op END operation END ass_op RP statement {
+    FOR LP ass_op END{
+        sprintf(for_loop, "L%d", loop);
+        loop++;
+        strcat(tacCode, for_loop);
+        strcat(tacCode, ":\n");
+    } operation END ass_op RP statement {
         $$ = newNode("FOR", 0, " ");
         $$->subtree1 = $3;
-        $$->subtree2 = $5;
-        $$->subtree3 = $7;
-        $$->subtree4 = $9;
+        $$->subtree2 = $6;
+        $$->subtree3 = $8;
+        $$->subtree4 = $10;
         $$->type = $$->subtree4->type;
+        strcat(tacCode, "brnz ");
+        strcat(tacCode, for_loop);
+        strcat(tacCode, ", ");
+        strcat(tacCode, $$->subtree2->tac);
+        strcat(tacCode, "\n");
     }
 ;
 
@@ -408,11 +476,9 @@ output:
         $$ = newNode("OUT", 0, " ");
         $$->subtree1 = $3;
         if($$->subtree1->type == 0){ // Cria um loop para printar cada caracter de um literal.
-            loop_num[0] = 'L';
-            loop_num[1] = loop + '0';
+            sprintf(loop_num, "L%d", loop);
             loop++;
-            reg_num[0] = '$';
-            reg_num[1] = reg + '0';
+            sprintf(reg_num, "$%d", reg);
             reg++;
             strcat(tacCode, "mov $1000, ");
             sprintf(str_num, "%ld", strlen($$->subtree1->value)-2);
@@ -507,8 +573,7 @@ log_op:
         $$->subtree2 = $3;
         if(!strcmp($2.id, "&&")) strcat(tacCode, "and ");
         else strcat(tacCode, "or ");
-        reg_num[0] = '$';
-        reg_num[1] = reg + '0';
+        sprintf(reg_num, "$%d", reg);
         strcat(tacCode, reg_num);
         strcat(tacCode, ", ");
         strcat(tacCode, $$->subtree1->tac);
@@ -552,8 +617,7 @@ rel_op:
         if(!strcmp($2.id, "==") || !strcmp($2.id, "!=")) strcat(tacCode, "seq ");
         else if(!strcmp($2.id, ">=") || !strcmp($2.id, "<")) strcat(tacCode, "slt ");
         else strcat(tacCode, "sleq ");
-        reg_num[0] = '$';
-        reg_num[1] = reg + '0';
+        sprintf(reg_num, "$%d", reg);
         strcat(tacCode, reg_num);
         strcat(tacCode, ", ");
         strcat(tacCode, $$->subtree1->tac);
@@ -645,8 +709,7 @@ ari_op:
         $$->subtree2 = $3;
         if(!strcmp($2.id, "+")) strcat(tacCode, "add ");
         else strcat(tacCode, "sub ");
-        reg_num[0] = '$';
-        reg_num[1] = reg + '0';
+        sprintf(reg_num, "$%d", reg);
         strcat(tacCode, reg_num);
         strcat(tacCode, ", ");
         strcat(tacCode, $$->subtree1->tac);
@@ -682,8 +745,7 @@ ari_op:
     SS_OP md_op {
         $$ = newNode("NEGATIVE", 0, " ");
         $$->subtree1 = $2;
-        reg_num[0] = '$';
-        reg_num[1] = reg + '0';
+        sprintf(reg_num, "$%d", reg);
         strcat(tacCode, "minus ");
         strcat(tacCode, reg_num);
         strcat(tacCode, ", ");
@@ -709,8 +771,7 @@ md_op:
         $$->subtree2 = $3;
         if(!strcmp($2.id, "*")) strcat(tacCode, "mul ");
         else strcat(tacCode, "div ");
-        reg_num[0] = '$';
-        reg_num[1] = reg + '0';
+        sprintf(reg_num, "$%d", reg);
         strcat(tacCode, reg_num);
         strcat(tacCode, ", ");
         strcat(tacCode, $$->subtree1->tac);
@@ -898,7 +959,7 @@ int main(int argc, char **argv){
     printf("────────────────────────────────────────\n");
     printf("Analysis in file '%s'", argv[1]);
     printf("\n────────────────────────────────────────\n");
-    char tacFile[100];
+
     int i = 5; // Pula os primeiros caracteres "tests/"
     while(++i){
         tacFile[i-6] = argv[1][i];
@@ -921,7 +982,7 @@ int main(int argc, char **argv){
     printf("\n");
     printf("Syntax analysis finished with %d semantic errors, %d syntax errors and %d lexical errors.\n", sem_errors, sin_errors, lex_errors);
     
-    // if(!sin_errors) showTree(syntaxTree, 0);
+    if(!sin_errors) showTree(syntaxTree, 0);
 
     showTable(table);
     destroyTree();
@@ -931,7 +992,7 @@ int main(int argc, char **argv){
     strcat(tacCode, "\n");
     strcat(tacCode, "call _main, 0");
     strcat(tacCode, "\n");
-    intermediateCode(tacFile, tacTable, tacCode);
+    if(!(sem_errors+sin_errors+lex_errors)) intermediateCode(tacFile, tacTable, tacCode);
 
     fclose(yyin);
     yylex_destroy();
