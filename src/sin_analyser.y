@@ -26,6 +26,7 @@
     int loop = 0;
     int scope_pos = 0;
     int scope = 0;
+    int param = 0;
     int params = 0;
     int args_ret = 0;
     int call_scope;
@@ -43,6 +44,13 @@
     int main_found = 0;
     int sin_errors = 0;
     int sem_errors = 0;
+    char list_int[1000] = "{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}";
+    char list_float[1000] = "{.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0}";
+    /*Symbol table*/
+    extern symbol table[10000];
+    /*Syntax Tree*/
+    extern treeNode* treeNodes[10000];
+    extern treeNode* syntaxTree;
 %}
 
 %union{
@@ -95,18 +103,18 @@ start:
 
 program:
     program program_block {
-        $$ = newNode("PROGRAM", 0, " ");
+        $$ = newNode("PROGRAM", 0, 0, " ");
         $$->subtree1 = $1;
         $$->subtree2 = $2;
     }
     | 
     program_block { $$ = $1; }
     |
-    error { $$ = newNode("ERROR", 0, " "); }
+    error { $$ = newNode("ERROR", 0, 0, " "); }
 ;
 
 program_block:
-    declar END { $$ = $1; }
+    declar { $$ = $1; }
     | 
     func_dclr { $$ = $1; }
 ;
@@ -118,41 +126,45 @@ func_dclr:
         updateParams(table, params);
         params = 0;
     } RP LB block RB {
-        $$ = newNode("FUNCTION", 0, " ");
+        $$ = newNode("FUNCTION", 0, 0, " ");
         $$->subtree1 = $1;
         $$->subtree2 = $4;
         $$->subtree3 = $8;
-        if($$->subtree1->type == 1){
-            if($$->subtree3->type == 1){
-                $$->type = $$->subtree1->type;
-            }else{
-                printf("SEMANTIC ERROR: Return type error: Function type is %d and return is %d. [%d, %d]\n", $$->subtree1->type, $$->subtree3->type, $2.line, $2.col);
-                sem_errors++;
-            }
-        } else if($$->subtree1->type == 2){
-            if($$->subtree3->type == 1){
-                $$->type = $$->subtree1->type;
-            }else if($$->subtree3->type == 2){
-                $$->type = $$->subtree3->type;
-            }else{
-                printf("SEMANTIC ERROR: Return type error: Function type is %d and return is %d. [%d, %d]\n", $$->subtree1->type, $$->subtree3->type, $2.line, $2.col);
-                sem_errors++;
-            }
-        } else if($$->subtree1->type == 3){
-            if($$->subtree3->type == 3){
-                $$->type = $$->subtree1->type;
-            }else{
-                printf("SEMANTIC ERROR: Return type error: Function type is %d and return is %d. [%d, %d]\n", $$->subtree1->type, $$->subtree3->type, $2.line, $2.col);
-                sem_errors++;
-            }
-        } else if($$->subtree1->type == 4){
-            if($$->subtree3->type == 3){
-                $$->type = $$->subtree1->type;
-            }else if($$->subtree3->type == 4){
-                $$->type = $$->subtree3->type;
-            }else{
-                printf("SEMANTIC ERROR: Return type error: Function type is %d and return is %d. [%d, %d]\n", $$->subtree1->type, $$->subtree3->type, $2.line, $2.col);
-                sem_errors++;
+        if($$->subtree3->ret){
+            if($$->subtree1->type == 1){
+                if($$->subtree3->type == 1){
+                    $$->type = $$->subtree1->type;
+                }else if($$->subtree3->type == 2){
+                    $$->type = $$->subtree1->type;
+                }else{
+                    printf("SEMANTIC ERROR: Return type error: Function type is %d and return is %d. [%d, %d]\n", $$->subtree1->type, $$->subtree3->type, $2.line, $2.col);
+                    sem_errors++;
+                }
+            } else if($$->subtree1->type == 2){
+                if($$->subtree3->type == 1){
+                    $$->type = $$->subtree1->type;
+                }else if($$->subtree3->type == 2){
+                    $$->type = $$->subtree3->type;
+                }else{
+                    printf("SEMANTIC ERROR: Return type error: Function type is %d and return is %d. [%d, %d]\n", $$->subtree1->type, $$->subtree3->type, $2.line, $2.col);
+                    sem_errors++;
+                }
+            } else if($$->subtree1->type == 3){
+                if($$->subtree3->type == 3){
+                    $$->type = $$->subtree1->type;
+                }else{
+                    printf("SEMANTIC ERROR: Return type error: Function type is %d and return is %d. [%d, %d]\n", $$->subtree1->type, $$->subtree3->type, $2.line, $2.col);
+                    sem_errors++;
+                }
+            } else if($$->subtree1->type == 4){
+                if($$->subtree3->type == 3){
+                    $$->type = $$->subtree1->type;
+                }else if($$->subtree3->type == 4){
+                    $$->type = $$->subtree3->type;
+                }else{
+                    printf("SEMANTIC ERROR: Return type error: Function type is %d and return is %d. [%d, %d]\n", $$->subtree1->type, $$->subtree3->type, $2.line, $2.col);
+                    sem_errors++;
+                }
             }
         }
         changeScope(0);
@@ -163,41 +175,45 @@ func_dclr:
     } RP LB {
         changeScope(1);
     } block RB {
-        $$ = newNode("FUNCTION", 0, " ");
+        $$ = newNode("FUNCTION", 0, 0, " ");
         $$->subtree1 = $1;
         $$->subtree2 = $7;
-        if($$->subtree1->type == 1){
-            if($$->subtree2->type == 1){
-                $$->type = $$->subtree1->type;
-            }else{
-                printf("SEMANTIC ERROR: Return type error: Function type is %d and return is %d. [%d, %d]\n", $$->subtree1->type, $$->subtree2->type, $2.line, $2.col);
-                sem_errors++;
+        if($$->subtree2->ret){
+            if($$->subtree1->type == 1){
+                if($$->subtree2->type == 1){
+                    $$->type = $$->subtree1->type;
+                }else{
+                    printf("SEMANTIC ERROR: Return type error: Function type is %d and return is %d. [%d, %d]\n", $$->subtree1->type, $$->subtree2->type, $2.line, $2.col);
+                    sem_errors++;
+                }
+            } else if($$->subtree1->type == 2){
+                if($$->subtree2->type == 1){
+                    $$->type = $$->subtree1->type;
+                }else if($$->subtree2->type == 2){
+                    $$->type = $$->subtree2->type;
+                }else{
+                    printf("SEMANTIC ERROR: Return type error: Function type is %d and return is %d. [%d, %d]\n", $$->subtree1->type, $$->subtree2->type, $2.line, $2.col);
+                    sem_errors++;
+                }
+            } else if($$->subtree1->type == 3){
+                if($$->subtree2->type == 3){
+                    $$->type = $$->subtree1->type;
+                }else{
+                    printf("SEMANTIC ERROR: Return type error: Function type is %d and return is %d. [%d, %d]\n", $$->subtree1->type, $$->subtree2->type, $2.line, $2.col);
+                    sem_errors++;
+                }
+            } else if($$->subtree1->type == 4){
+                if($$->subtree2->type == 3){
+                    $$->type = $$->subtree1->type;
+                }else if($$->subtree2->type == 4){
+                    $$->type = $$->subtree2->type;
+                }else{
+                    printf("SEMANTIC ERROR: Return type error: Function type is %d and return is %d. [%d, %d]\n", $$->subtree1->type, $$->subtree2->type, $2.line, $2.col);
+                    sem_errors++;
+                }
             }
-        } else if($$->subtree1->type == 2){
-            if($$->subtree2->type == 1){
-                $$->type = $$->subtree1->type;
-            }else if($$->subtree2->type == 2){
-                $$->type = $$->subtree2->type;
-            }else{
-                printf("SEMANTIC ERROR: Return type error: Function type is %d and return is %d. [%d, %d]\n", $$->subtree1->type, $$->subtree2->type, $2.line, $2.col);
-                sem_errors++;
-            }
-        } else if($$->subtree1->type == 3){
-            if($$->subtree2->type == 3){
-                $$->type = $$->subtree1->type;
-            }else{
-                printf("SEMANTIC ERROR: Return type error: Function type is %d and return is %d. [%d, %d]\n", $$->subtree1->type, $$->subtree2->type, $2.line, $2.col);
-                sem_errors++;
-            }
-        } else if($$->subtree1->type == 4){
-            if($$->subtree2->type == 3){
-                $$->type = $$->subtree1->type;
-            }else if($$->subtree2->type == 4){
-                $$->type = $$->subtree2->type;
-            }else{
-                printf("SEMANTIC ERROR: Return type error: Function type is %d and return is %d. [%d, %d]\n", $$->subtree1->type, $$->subtree2->type, $2.line, $2.col);
-                sem_errors++;
-            }
+        }else{
+            strcat(tacCode, "return\n");
         }
         changeScope(0);
     }
@@ -206,7 +222,7 @@ func_dclr:
 params:
     params SEPARATOR param {
         params++;
-        $$ = newNode("PARAMS", 0, " ");
+        $$ = newNode("PARAMS", 0, 0, " ");
         $$->subtree1 = $1;
         $$->subtree2 = $3;
     }
@@ -221,58 +237,46 @@ param:
     TYPE ID {
         // reg++;
         newSymbol(table, $2.id, $1.id, "PAR      ", $2.line, $2.col, stack[scope_pos], params+1, reg);   
-        $$ = newNode(strcat(strcat($1.id," var "), $2.id), checkType(table, $2.id, stack[scope_pos], 1), " ");
+        $$ = newNode(strcat(strcat($1.id," var "), $2.id), checkType(table, $2.id, stack[scope_pos], 1), 0, " ");
     }
     |
     TYPE LIST ID {
         // reg++;
         newSymbol(table, $3.id, strcat($1.id," list"), "LIST PAR ",$3.line, $3.col, stack[scope_pos], params+1, reg);
-        $$ = newNode(strcat(strcat($1.id," "), $3.id), checkType(table, $3.id, stack[scope_pos], 1), " ");
+        $$ = newNode(strcat(strcat($1.id," "), $3.id), checkType(table, $3.id, stack[scope_pos], 1), 0, " ");
     }
 ;
 
 declar:
-    TYPE ID {
+    TYPE ID END{
         strcat(tacTable, $1.id);
         strcat(tacTable, " ");
         strcat(tacTable, $2.id);
         strcat(tacTable, "\n");
-        // strcat(tacCode, "mov ");
-        // reg_num[0] = '$';
-        // reg_num[1] = reg + '0';
-        // strcat(tacCode, reg_num);
-        // strcat(tacCode, ", ");
-        // strcat(tacCode, $2.id);
-        // strcat(tacCode, "\n");
-        // reg++;
         if(searchTable(table, $2.id, 0, 1, stack, scope_pos)){
             printf("SEMANTIC ERROR: Variable %s already declared [%d, %d]\n", $2.id, $2.line, $2.col);
             sem_errors++;
         }
         newSymbol(table, $2.id, $1.id, "VAR      ", $2.line, $2.col, stack[scope_pos], 0, reg);   
-        $$ = newNode(strcat(strcat($1.id," var "), $2.id), checkType(table, $2.id, stack[scope_pos], 1), " ");
+        $$ = newNode(strcat(strcat($1.id," var "), $2.id), checkType(table, $2.id, stack[scope_pos], 1), 0, " ");
     }
     |
-    TYPE LIST ID {
+    TYPE LIST ID END{
         strcat(tacTable, $1.id);
         strcat(tacTable, " ");
         strcat(tacTable, $3.id);
-        // strcat(tacTable, "[]");
-        strcat(tacTable, "\n");
-        // strcat(tacCode, "mov ");
-        // reg_num[0] = '$';
-        // reg_num[1] = reg + '0';
-        // strcat(tacCode, reg_num);
-        // strcat(tacCode, ", ");
-        // strcat(tacCode, $3.id);
-        // strcat(tacCode, "\n");
-        // reg++;
+        strcat(tacTable, "[100] = ");
+        if(!strcmp($1.id, "int")) strcat(tacTable, list_int);
+        else strcat(tacTable, list_float);
+        strcat(tacTable, "\nint ");
+        strcat(tacTable, $3.id);
+        strcat(tacTable, "_size = 0\n");
         if(searchTable(table, $3.id, 0, 1, stack, scope_pos)) {
             printf("SEMANTIC ERROR: Variable %s already declared [%d, %d]\n", $3.id, $3.line, $3.col);
             sem_errors++;
         }
         newSymbol(table, $3.id, strcat($1.id," list"), "LIST VAR ",$3.line, $3.col, stack[scope_pos], 0, reg);
-        $$ = newNode(strcat(strcat($1.id," "), $3.id), checkType(table, $3.id, stack[scope_pos], 1), " ");
+        $$ = newNode(strcat(strcat($1.id," "), $3.id), checkType(table, $3.id, stack[scope_pos], 1), 0, " ");
     }
 ;
 
@@ -288,7 +292,7 @@ func:
             sem_errors++;
         }
         newSymbol(table, $2.id, $1.id, "FUNC     ", $2.line, $2.col, stack[scope_pos], -1, -1);
-        $$ = newNode(strcat(strcat($1.id," function "), $2.id), checkType(table, $2.id, stack[scope_pos], 1), " ");
+        $$ = newNode(strcat(strcat($1.id," function "), $2.id), checkType(table, $2.id, stack[scope_pos], 1), 0, " ");
     }
     |
     TYPE LIST ID {
@@ -302,21 +306,32 @@ func:
             sem_errors++;
         }
         newSymbol(table, $3.id, strcat($1.id," list"), "LIST FUNC", $3.line, $3.col, scope, -1, -1);
-        $$ = newNode(strcat(strcat($1.id," function list "), $3.id), checkType(table, $3.id, stack[scope_pos], 1), " ");
+        $$ = newNode(strcat(strcat($1.id," function list "), $3.id), checkType(table, $3.id, stack[scope_pos], 1), 0, " ");
     }
 ;
 
 block:
     block statement {
-        $$ = newNode("BLOCK", 0, " ");
+        $$ = newNode("BLOCK", 0, 0, " ");
         $$->subtree1 = $1;
         $$->subtree2 = $2;
+        if($$->subtree1->ret || $$->subtree2->ret) $$->ret = 1;
+        $$->type = $$->subtree2->type;
+    }
+    | 
+    block declar {
+        $$ = newNode("BLOCK", 0, 0, " ");
+        $$->subtree1 = $1;
+        $$->subtree2 = $2;
+        if($$->subtree1->ret || $$->subtree2->ret) $$->ret = 1;
         $$->type = $$->subtree2->type;
     }
     | 
     statement { $$ = $1; }
     |
-    error { $$ = newNode("ERROR", 0, " "); }
+    declar { $$ = $1; }
+    |
+    error { $$ = newNode("ERROR", 0, 0, " "); }
 ;
 
 statement:
@@ -345,8 +360,6 @@ flow_ctr:
 expr:
     operation { $$ = $1; }
     |
-    declar { $$ = $1; }
-    |
     input { $$ = $1; }
     |
     output { $$ = $1; }
@@ -358,6 +371,7 @@ if_statement:
     ass_op END{ $$ = $1; }
     |
     LB {
+        strcat(tacCode, "// if\n");
         sprintf(if_loop, "L%d", loop);
         loop++;
         sprintf(end_loop, "L%d", loop);
@@ -383,7 +397,7 @@ if_statement:
 
 if_else:
     IF LP operation RP if_statement %prec ELSE {
-        $$ = newNode("IF", 0, " ");
+        $$ = newNode("IF", 0, 0, " ");
         $$->subtree1 = $3;
         $$->subtree2 = $5;
         $$->type = $$->subtree2->type;
@@ -396,6 +410,7 @@ if_else:
     }
     | 
     IF LP operation RP if_statement ELSE {
+        strcat(tacCode, "// if\n");
         sprintf(else_loop, "L%d", loop);
         loop++;
         sprintf(finish_loop, "L%d", loop);
@@ -406,7 +421,7 @@ if_else:
         strcat(tacCode, else_loop);
         strcat(tacCode, ":\n");
     } statement {
-        $$ = newNode("IF ELSE", 0, " ");
+        $$ = newNode("IF ELSE", 0, 0, " ");
         $$->subtree1 = $3;
         $$->subtree2 = $5;
         $$->subtree3 = $8;
@@ -430,12 +445,13 @@ if_else:
 
 for:
     FOR LP ass_op END{
+        strcat(tacCode, "// for\n");
         sprintf(for_loop, "L%d", loop);
         loop++;
         strcat(tacCode, for_loop);
         strcat(tacCode, ":\n");
     } operation END ass_op RP statement {
-        $$ = newNode("FOR", 0, " ");
+        $$ = newNode("FOR", 0, 0, " ");
         $$->subtree1 = $3;
         $$->subtree2 = $6;
         $$->subtree3 = $8;
@@ -451,7 +467,7 @@ for:
 
 return:
     RETURN operation {
-        $$ = newNode("RETURN", 0, " ");
+        $$ = newNode("RETURN", 0, 1, " ");
         $$->subtree1 = $2;
         $$->type = $$->subtree1->type;
         strcat(tacCode, "return ");
@@ -462,8 +478,9 @@ return:
 
 input:
     IN LP id RP {
-        $$ = newNode("IN", 0, " ");
+        $$ = newNode("IN", 0, 0, " ");
         $$->subtree1 = $3;
+        strcat(tacCode, "// in\n");
         if($$->subtree1->type == 1) strcat(tacCode, "scani ");
         else strcat(tacCode, "scanf ");
         strcat(tacCode, $$->subtree1->tac);
@@ -473,8 +490,9 @@ input:
 
 output:
     OUT LP operation RP { 
-        $$ = newNode("OUT", 0, " ");
+        $$ = newNode("OUT", 0, 0, " ");
         $$->subtree1 = $3;
+        strcat(tacCode, "// out\n");
         if($$->subtree1->type == 0){ // Cria um loop para printar cada caracter de um literal.
             sprintf(loop_num, "L%d", loop);
             loop++;
@@ -516,7 +534,7 @@ output:
 
 ass_op:
     id ASS_OP operation {
-        $$ = newNode("ASSIGN", 0, " ");
+        $$ = newNode("ASSIGN", 0, 0, " ");
         $$->subtree1 = $1;
         $$->subtree2 = $3;
         strcat(tacCode, "mov ");
@@ -568,7 +586,7 @@ operation:
 
 log_op:
     log_op LLOG_OP rel_op {
-        $$ = newNode("LOG OP", 0, " ");
+        $$ = newNode("LOG OP", 0, 0, " ");
         $$->subtree1 = $1;
         $$->subtree2 = $3;
         if(!strcmp($2.id, "&&")) strcat(tacCode, "and ");
@@ -611,7 +629,7 @@ log_op:
 
 rel_op:
     rel_op REL_OP list_op {
-        $$ = newNode("REL OP", 0, " ");
+        $$ = newNode("REL OP", 0, 0, " ");
         $$->subtree1 = $1;
         $$->subtree2 = $3;
         if(!strcmp($2.id, "==") || !strcmp($2.id, "!=")) strcat(tacCode, "seq ");
@@ -665,10 +683,55 @@ rel_op:
 ;
 
 list_op:
-    list_op LIST_FUNC ari_op {
-        $$ = newNode("LIST FUNC", 0, " ");
+    ari_op LIST_FUNC list_op {
+        $$ = newNode("LIST FUNC", 0, 0, " ");
         $$->subtree1 = $1;
         $$->subtree2 = $3;
+        if(!strcmp($2.id, ">>")){
+            strcat(tacCode, "mov $500, &");
+            strcat(tacCode, $$->subtree2->tac);
+            strcat(tacCode, "\nmov $600, 0\n");
+            strcat(tacCode, "mov $601, ");
+            strcat(tacCode, $$->subtree2->tac);
+            strcat(tacCode, "_size\n");
+            sprintf(for_loop, "L%d", loop);
+            loop++;
+            strcat(tacCode, for_loop);
+            strcat(tacCode, ":\n");
+            strcat(tacCode, "mov $603, $500[$600]\n");
+            strcat(tacCode, "param $603\n");
+            strcat(tacCode, "call _");
+            strcat(tacCode, $$->subtree1->value);
+            strcat(tacCode, ", 1\npop $605\n");
+            strcat(tacCode, "mov $500[$600], $605\n");
+            strcat(tacCode, "add $600, $600, 1\n");
+            strcat(tacCode, "sub $602, $601, $600\n");
+            strcat(tacCode, "brnz ");
+            strcat(tacCode, for_loop);
+            strcat(tacCode, ", $602\n//");
+        }else{
+            strcat(tacCode, "mov $500, &");
+            strcat(tacCode, $$->subtree2->tac);
+            strcat(tacCode, "\nmov $600, 0\n");
+            strcat(tacCode, "mov $601, ");
+            strcat(tacCode, $$->subtree2->tac);
+            strcat(tacCode, "_size\n");
+            sprintf(for_loop, "L%d", loop);
+            loop++;
+            strcat(tacCode, for_loop);
+            strcat(tacCode, ":\n");
+            strcat(tacCode, "mov $603, $500[$600]\n");
+            strcat(tacCode, "param $603\n");
+            strcat(tacCode, "call _");
+            strcat(tacCode, $$->subtree1->value);
+            strcat(tacCode, ", 1\npop $605\n");
+            strcat(tacCode, "mov $500[$600], $605\n");
+            strcat(tacCode, "add $600, $600, 1\n");
+            strcat(tacCode, "sub $602, $601, $600\n");
+            strcat(tacCode, "brnz ");
+            strcat(tacCode, for_loop);
+            strcat(tacCode, ", $602\n//");
+        }
         if($$->subtree1->type == 1 || $$->subtree1->type == 2){
             if($$->subtree2->type == 3 || $$->subtree2->type == 4){
                 $$->type = $$->subtree2->type;
@@ -682,10 +745,22 @@ list_op:
         }
     }
     |
-    list_op RLIST_OP ari_op {
-        $$ = newNode("LIST OP", 0, " ");
+    ari_op RLIST_OP list_op {
+        $$ = newNode("LIST OP", 0, 0, " ");
         $$->subtree1 = $1;
         $$->subtree2 = $3;
+        strcat(tacCode, "mov $500, &");
+        strcat(tacCode, $$->subtree2->tac);
+        strcat(tacCode, "\nmov $500[");
+        strcat(tacCode, $$->subtree2->tac);
+        strcat(tacCode, "_size], ");
+        strcat(tacCode, $$->subtree1->tac);
+        strcat(tacCode, "\nadd ");
+        strcat(tacCode, $$->subtree2->tac);
+        strcat(tacCode, "_size, ");
+        strcat(tacCode, $$->subtree2->tac);
+        strcat(tacCode, "_size, 1\n//");
+        strcpy($$->tac, "$500");
         if($$->subtree1->type == 1 || $$->subtree1->type == 2){
             if($$->subtree2->type == 3 || $$->subtree2->type == 4){
                 $$->type = $$->subtree2->type;
@@ -704,7 +779,7 @@ list_op:
 
 ari_op:
     ari_op SS_OP md_op {
-        $$ = newNode("ARI SS OP", 0, " ");
+        $$ = newNode("ARI SS OP", 0, 0, " ");
         $$->subtree1 = $1;
         $$->subtree2 = $3;
         if(!strcmp($2.id, "+")) strcat(tacCode, "add ");
@@ -743,7 +818,7 @@ ari_op:
     }
     |
     SS_OP md_op {
-        $$ = newNode("NEGATIVE", 0, " ");
+        $$ = newNode("NEGATIVE", 0, 0, " ");
         $$->subtree1 = $2;
         sprintf(reg_num, "$%d", reg);
         strcat(tacCode, "minus ");
@@ -766,7 +841,7 @@ ari_op:
 
 md_op:
     md_op MD_OP un_op {
-        $$ = newNode("ARI MD OP", 0, " ");
+        $$ = newNode("ARI MD OP", 0, 0, " ");
         $$->subtree1 = $1;
         $$->subtree2 = $3;
         if(!strcmp($2.id, "*")) strcat(tacCode, "mul ");
@@ -809,10 +884,86 @@ md_op:
 
 un_op:
     UN_OP un_op {
-        $$ = newNode("UNARY OP", 0, " ");
+        $$ = newNode("UNARY OP", 0, 0, " ");
         $$->subtree1 = $2;
+        sprintf(reg_num, "$%d", reg);
+        strcpy($$->tac, reg_num);
+        reg++;
         if($$->subtree1->type != 0){
-            $$->type = $$->subtree1->type;
+            if(!strcmp($1.id, "!")){
+                if($$->subtree1->type < 3){
+                    $$->type = 1;
+                    strcat(tacCode, "not ");
+                    strcat(tacCode, reg_num);
+                    strcat(tacCode, $$->subtree1->tac);
+                }else{
+                    strcat(tacCode, "mov $500, &");
+                    strcat(tacCode, $$->subtree1->tac);
+                    strcat(tacCode, "\nmov $600, 0\n");
+                    strcat(tacCode, "mov $605, 1\n");
+                    strcat(tacCode, "mov $601, ");
+                    strcat(tacCode, $$->subtree1->tac);
+                    strcat(tacCode, "_size\n");
+                    sprintf(for_loop, "L%d", loop);
+                    loop++;
+                    strcat(tacCode, for_loop);
+                    strcat(tacCode, ":\n");
+                    strcat(tacCode, "mov $603, $500[$605]\n");
+                    strcat(tacCode, "mov $500[$600], $603\n");
+                    strcat(tacCode, "sub ");
+                    strcat(tacCode, $$->subtree1->tac);
+                    strcat(tacCode, "_size, ");
+                    strcat(tacCode, $$->subtree1->tac);
+                    strcat(tacCode, "_size, 1\n");
+                    strcat(tacCode, "add $600, $600, 1\n");
+                    strcat(tacCode, "add $605, $605, 1\n");
+                    strcat(tacCode, "sub $602, $601, $600\n");
+                    strcat(tacCode, "brnz ");
+                    strcat(tacCode, for_loop);
+                    strcat(tacCode, ", $602\n//");
+                    strcpy($$->tac, "$500");
+                    $$->type = $$->subtree1->type;
+                }
+            }else{
+                if($$->subtree1->type < 3){
+                    printf("SEMANTIC ERROR: Type error in unary operator with type %d. [%d, %d]\n", $$->subtree1->type, $1.line, $1.col);
+                    sem_errors++;
+                }else if(!strcmp($1.id, "%")){
+                    strcat(tacCode, "mov $500, &");
+                    strcat(tacCode, $$->subtree1->tac);
+                    strcat(tacCode, "\nmov $600, 0\n");
+                    strcat(tacCode, "mov $605, 1\n");
+                    strcat(tacCode, "mov $601, ");
+                    strcat(tacCode, $$->subtree1->tac);
+                    strcat(tacCode, "_size\n");
+                    sprintf(for_loop, "L%d", loop);
+                    loop++;
+                    strcat(tacCode, for_loop);
+                    strcat(tacCode, ":\n");
+                    strcat(tacCode, "mov $603, $500[$605]\n");
+                    strcat(tacCode, "mov $500[$600], $603\n");
+                    strcat(tacCode, "sub ");
+                    strcat(tacCode, $$->subtree1->tac);
+                    strcat(tacCode, "_size, ");
+                    strcat(tacCode, $$->subtree1->tac);
+                    strcat(tacCode, "_size, 1\n");
+                    strcat(tacCode, "add $600, $600, 1\n");
+                    strcat(tacCode, "add $605, $605, 1\n");
+                    strcat(tacCode, "sub $602, $601, $600\n");
+                    strcat(tacCode, "brnz ");
+                    strcat(tacCode, for_loop);
+                    strcat(tacCode, ", $602\n//");
+                    strcpy($$->tac, "$500");
+                    $$->type = $$->subtree1->type;
+                }else{
+                    strcat(tacCode, "mov $500, &");
+                    strcat(tacCode, $$->subtree1->tac);
+                    strcat(tacCode, "\nmov ");
+                    strcat(tacCode, reg_num);
+                    strcat(tacCode, ", $500[0]\n");
+                    $$->type = $$->subtree1->type-2;
+                }
+            }
         } else{
             printf("SEMANTIC ERROR: Type error in unary operator with type %d. [%d, %d]\n", $$->subtree1->type, $1.line, $1.col);
             sem_errors++;
@@ -829,11 +980,11 @@ val:
     | 
     LP operation RP { $$ = $2; }
     |
-    INT { $$ = newNode($1.id, 1, $1.id); }
+    INT { $$ = newNode($1.id, 1, 0, $1.id); }
     | 
-    FLOAT { $$ = newNode($1.id, 2, $1.id); }
+    FLOAT { $$ = newNode($1.id, 2, 0, $1.id); }
     | 
-    NIL { $$ = newNode("NIL", 3, $1.id); }
+    NIL { $$ = newNode("NIL", 3, 0, $1.id); }
     |
     LITERAL {
         strcat(tacTable, "char ");
@@ -845,7 +996,7 @@ val:
         strcat(tacTable, $1.id);
         strcat(tacTable, "\n");
         str++;
-        $$ = newNode($1.id, 0, str_num); 
+        $$ = newNode($1.id, 0, 0, str_num); 
     }
 ;
 
@@ -856,7 +1007,7 @@ func_call:
         if(!call_scope){
             printf("SEMANTIC ERROR: Function '%s' not declared [%d, %d]\n", $1.id, $1.line, $1.col);
             sem_errors++;
-        }else if(checkParams(table, $1.id) != args){
+        }else if(checkParams(table, $1.id, -1) != args){
             printf("SEMANTIC ERROR: Function '%s' calls for different number of parameters [%d, %d]\n", $1.id, $1.line, $1.col);
             sem_errors++;
         }else if(param_error){
@@ -864,7 +1015,7 @@ func_call:
             param_error = 0;
             sem_errors++;
         }
-        $$ = newNode("CALL", checkType(table, $1.id, stack[scope_pos], 0), " ");
+        $$ = newNode("CALL", checkType(table, $1.id, stack[scope_pos], 0), 0, " ");
         $$->subtree2 = $4;
         strcat(tacCode, "call _");
         strcat(tacCode, $1.id);
@@ -880,12 +1031,12 @@ func_call:
         if(!searchTable(table, $1.id, 1, 1, stack, scope_pos)){
             printf("SEMANTIC ERROR: Function %s not declared [%d, %d]\n", $1.id, $1.line, $1.col);
             sem_errors++;
-        }else if(checkParams(table, $1.id) != args){
+        }else if(checkParams(table, $1.id, -1) != args){
             printf("SEMANTIC ERROR: Function %s calls for different number of parameters [%d, %d]\n", $1.id, $1.line, $1.col);
             sem_errors++;
         }
         args = 0;
-        $$ = newNode("CALL", checkType(table, $1.id, stack[scope_pos], 0), " ");
+        $$ = newNode("CALL", checkType(table, $1.id, stack[scope_pos], 0), 0, " ");
         strcat(tacCode, "call _");
         strcat(tacCode, $1.id);
         strcat(tacCode, ", 0\n");
@@ -898,14 +1049,19 @@ id:
             printf("SEMANTIC ERROR: Variable %s not declared [%d, %d]\n", $1.id, $1.line, $1.col);
             sem_errors++;
         }
-        $$ = newNode($1.id, checkType(table, $1.id, stack[scope_pos], 1), $1.id); 
+        param = checkParams(table, $1.id, stack[scope_pos]);
+        sprintf(reg_num, "#%d", param-1);
+        if(param)
+            $$ = newNode($1.id, checkType(table, $1.id, stack[scope_pos], 1), 0, reg_num); 
+        else
+            $$ = newNode($1.id, checkType(table, $1.id, stack[scope_pos], 1), 0, $1.id); 
     }
 ;
 
 func_params: 
     func_params SEPARATOR operation{
         args++;
-        $$ = newNode("PARAMS", 0, " ");
+        $$ = newNode("PARAMS", 0, 0, " ");
         $$->subtree1 = $1;
         $$->subtree2 = $3;
         strcat(tacCode, "param ");
@@ -920,7 +1076,7 @@ func_params:
     | 
     operation { 
         args++;
-        $$ = newNode("PARAMS", 0, " ");
+        $$ = newNode("PARAMS", 0, 0, " ");
         $$->subtree1 = $1;
         strcat(tacCode, "param ");
         strcat(tacCode, $$->subtree1->tac);
@@ -959,14 +1115,13 @@ int main(int argc, char **argv){
     printf("────────────────────────────────────────\n");
     printf("Analysis in file '%s'", argv[1]);
     printf("\n────────────────────────────────────────\n");
-
-    int i = 5; // Pula os primeiros caracteres "tests/"
+    
+    int i = 0; // Pula os primeiros caracteres "tests/"
     while(++i){
-        tacFile[i-6] = argv[1][i];
-        if(tacFile[i-6] == '.') break;
+        tacFile[i-1] = argv[1][i-1];
+        if(tacFile[i-1] == '.' || i > 100) break;
     }
     strcat(tacFile, "tac");
-    
     if(argc > 1) yyin = fopen(argv[1], "r");
     else return 0;
 

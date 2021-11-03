@@ -3,6 +3,11 @@
 /*Stores symbol table and tree size*/
 int table_size = 0;
 int tree_size = 0;
+/*Symbol table*/
+symbol table[10000];
+/*Syntax Tree*/
+treeNode* treeNodes[10000];
+treeNode* syntaxTree;
 
 /*Creates new symbol in symbol table*/
 extern void newSymbol(symbol* identifier, char* id, char* type, char* declar, int line, int col, int scope, int params, int reg){
@@ -45,10 +50,17 @@ extern int searchTable(symbol* identifier, char* id, int func, int declar, int s
     return 0;
 }
 
-extern int checkParams(symbol* identifier, char* id){
-    for(int i = 0; i < table_size; i++){
-        if(!strcmp(identifier[i].id, id))
-            return identifier[i].params;
+extern int checkParams(symbol* identifier, char* id, int scope){
+    if(scope == -1){
+        for(int i = 0; i < table_size; i++){
+            if(!strcmp(identifier[i].id, id))
+                return identifier[i].params;
+        }
+    }else{
+        for(int i = 0; i < table_size; i++){
+            if(!strcmp(identifier[i].id, id) && identifier[i].scope == scope)
+                return identifier[i].params;
+        }
     }
 
     return 0;
@@ -139,7 +151,7 @@ extern void showTable(symbol* identifier){
 }
 
 /*Creates new node in tree*/
-extern treeNode* newNode(char* value, int type, char* tac){
+extern treeNode* newNode(char* value, int type, int ret, char* tac){
     treeNode* node = (treeNode*)malloc(sizeof(treeNode));
 
     node->subtree1 = NULL;
@@ -149,6 +161,7 @@ extern treeNode* newNode(char* value, int type, char* tac){
     
     strcpy(node->value, value);
     node->type = type;
+    node->ret = ret;
     strcpy(node->tac, tac);
 
     treeNodes[tree_size] = node;
