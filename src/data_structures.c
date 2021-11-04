@@ -91,6 +91,20 @@ extern void updateParams(symbol* identifier, int params){
     }
 }
 
+extern int checkScope(symbol* identifier, char* id, int scope){
+    int flag = 0;
+    while(!flag){
+        for(int i = 0; i < table_size; i++){
+            if(!strcmp(identifier[i].id, id) && identifier[i].scope == scope){
+                return scope;
+            }
+        }
+        scope--;
+    }
+
+    return 0;
+}
+
 extern int checkType(symbol* identifier, char* id, int scope, int check_scope){
      if(check_scope){
         for(int i = 0; i < table_size; i++){

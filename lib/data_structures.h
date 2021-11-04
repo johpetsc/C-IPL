@@ -33,6 +33,7 @@ typedef struct treeNode {
 extern void newSymbol(symbol* identifier, char* id, char* type, char* declar, int line, int col, int scope, int params, int reg);
 extern int searchTable(symbol* identifier, char* id, int func, int declar, int stack[], int scope_pos);
 extern void updateParams(symbol* identifier, int params);
+extern int checkScope(symbol* identifier, char* id, int scope);
 extern int checkParamType(symbol* identifier, int param, int scope);
 extern int checkParams(symbol* identifier, char* id, int scope);
 extern int checkType(symbol* identifier, char* id, int scope, int check_scope);
