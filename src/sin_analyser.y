@@ -221,13 +221,11 @@ params:
 
 param:
     TYPE ID {
-        // reg++;
         newSymbol(table, $2.id, $1.id, "PAR      ", $2.line, $2.col, stack[scope_pos], params+1, reg);   
         $$ = newNode(strcat(strcat($1.id," var "), $2.id), checkType(table, $2.id, stack[scope_pos], 1), 0, " ");
     }
     |
     TYPE LIST ID {
-        // reg++;
         newSymbol(table, $3.id, strcat($1.id," list"), "LIST PAR ",$3.line, $3.col, stack[scope_pos], params+1, reg);
         $$ = newNode(strcat(strcat($1.id," "), $3.id), checkType(table, $3.id, stack[scope_pos], 1), 0, " ");
     }
@@ -1719,7 +1717,6 @@ func_params:
             param_error = 1;
         else if($$->subtree2->type > 2 && checkParamType(table, args, call_scope-1) < 3)
             param_error = 1;
-        // printf("asub type: %d, check type: %d, args: %d, call: %d\n", $$->subtree2->type, checkParamType(table, args, call_scope-1), args, call_scope);
     }
     | 
     operation { 
@@ -1733,7 +1730,6 @@ func_params:
             param_error = 1;
         else if($$->subtree1->type > 2 && checkParamType(table, args, call_scope-1) < 3)
             param_error = 1;
-        // printf("bsub type: %d, check type: %d, args: %d, call: %d\n", $$->subtree1->type, checkParamType(table, args, call_scope-1), args, call_scope);
     }
 ;
 
@@ -1744,18 +1740,10 @@ extern void changeScope(int op){
         scope++;
         scope_pos++;
         stack[scope_pos] = scope;
-        // for(int i=0; i<10; i++){
-        //     printf("%d ", stack[i]);
-        // }
-        // printf("\n%d, %d, %d\n", scope_pos, scope, stack[scope_pos]);
     }
     else{
         stack[scope_pos] = 0;
         scope_pos--;
-        // for(int i=0; i<10; i++){
-        //     printf("%d ", stack[i]);
-        // }
-        // printf("\n%d, %d, %d\n", scope_pos, scope, stack[scope_pos]);
     }
 }
 
@@ -1764,7 +1752,7 @@ int main(int argc, char **argv){
     printf("Analysis in file '%s'", argv[1]);
     printf("\n────────────────────────────────────────\n");
     
-    int i = 0; // Pula os primeiros caracteres "tests/"
+    int i = 0;
     while(++i){
         tacFile[i-1] = argv[1][i-1];
         if(tacFile[i-1] == '.' || i > 100) break;

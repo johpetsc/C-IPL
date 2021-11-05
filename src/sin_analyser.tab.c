@@ -574,13 +574,13 @@ static const yytype_int8 yytranslate[] =
 static const yytype_int16 yyrline[] =
 {
        0,    87,    87,    91,    97,    99,   103,   105,   109,   111,
-     109,   159,   161,   159,   209,   216,   223,   229,   237,   253,
-     279,   293,   309,   317,   325,   327,   329,   333,   335,   337,
-     337,   344,   348,   348,   356,   358,   362,   364,   366,   370,
-     380,   380,   431,   443,   449,   431,   476,   491,   504,   548,
-     708,   726,   806,   810,  1156,  1160,  1264,  1313,  1317,  1395,
-    1414,  1418,  1496,  1500,  1609,  1613,  1615,  1617,  1619,  1621,
-    1623,  1625,  1638,  1638,  1674,  1691,  1710,  1725
+     109,   159,   161,   159,   209,   216,   223,   228,   235,   251,
+     277,   291,   307,   315,   323,   325,   327,   331,   333,   335,
+     335,   342,   346,   346,   354,   356,   360,   362,   364,   368,
+     378,   378,   429,   441,   447,   429,   474,   489,   502,   546,
+     706,   724,   804,   808,  1154,  1158,  1262,  1311,  1315,  1393,
+    1412,  1416,  1494,  1498,  1607,  1611,  1613,  1615,  1617,  1619,
+    1621,  1623,  1636,  1636,  1672,  1689,  1708,  1722
 };
 #endif
 
@@ -2074,25 +2074,23 @@ yyreduce:
   case 16:
 #line 223 "src/sin_analyser.y"
             {
-        // reg++;
         newSymbol(table, (yyvsp[0].lex).id, (yyvsp[-1].lex).id, "PAR      ", (yyvsp[0].lex).line, (yyvsp[0].lex).col, stack[scope_pos], params+1, reg);   
         (yyval.treeNode) = newNode(strcat(strcat((yyvsp[-1].lex).id," var "), (yyvsp[0].lex).id), checkType(table, (yyvsp[0].lex).id, stack[scope_pos], 1), 0, " ");
     }
-#line 2082 "src/sin_analyser.tab.c"
+#line 2081 "src/sin_analyser.tab.c"
     break;
 
   case 17:
-#line 229 "src/sin_analyser.y"
+#line 228 "src/sin_analyser.y"
                  {
-        // reg++;
         newSymbol(table, (yyvsp[0].lex).id, strcat((yyvsp[-2].lex).id," list"), "LIST PAR ",(yyvsp[0].lex).line, (yyvsp[0].lex).col, stack[scope_pos], params+1, reg);
         (yyval.treeNode) = newNode(strcat(strcat((yyvsp[-2].lex).id," "), (yyvsp[0].lex).id), checkType(table, (yyvsp[0].lex).id, stack[scope_pos], 1), 0, " ");
     }
-#line 2092 "src/sin_analyser.tab.c"
+#line 2090 "src/sin_analyser.tab.c"
     break;
 
   case 18:
-#line 237 "src/sin_analyser.y"
+#line 235 "src/sin_analyser.y"
                {
         strcat(tacTable, (yyvsp[-2].lex).id);
         strcat(tacTable, " ");
@@ -2108,11 +2106,11 @@ yyreduce:
         newSymbol(table, (yyvsp[-1].lex).id, (yyvsp[-2].lex).id, "VAR      ", (yyvsp[-1].lex).line, (yyvsp[-1].lex).col, stack[scope_pos], 0, reg);   
         (yyval.treeNode) = newNode(strcat(strcat((yyvsp[-2].lex).id," var "), (yyvsp[-1].lex).id), checkType(table, (yyvsp[-1].lex).id, stack[scope_pos], 1), 0, " ");
     }
-#line 2112 "src/sin_analyser.tab.c"
+#line 2110 "src/sin_analyser.tab.c"
     break;
 
   case 19:
-#line 253 "src/sin_analyser.y"
+#line 251 "src/sin_analyser.y"
                     {
         strcat(tacTable, (yyvsp[-3].lex).id);
         strcat(tacTable, " ");
@@ -2136,11 +2134,11 @@ yyreduce:
         newSymbol(table, (yyvsp[-1].lex).id, strcat((yyvsp[-3].lex).id," list"), "LIST VAR ",(yyvsp[-1].lex).line, (yyvsp[-1].lex).col, stack[scope_pos], 0, reg);
         (yyval.treeNode) = newNode(strcat(strcat((yyvsp[-3].lex).id," "), (yyvsp[-1].lex).id), checkType(table, (yyvsp[-1].lex).id, stack[scope_pos], 1), 0, " ");
     }
-#line 2140 "src/sin_analyser.tab.c"
+#line 2138 "src/sin_analyser.tab.c"
     break;
 
   case 20:
-#line 279 "src/sin_analyser.y"
+#line 277 "src/sin_analyser.y"
             {
         strcat(tacCode, "_");
         strcat(tacCode, (yyvsp[0].lex).id);
@@ -2154,11 +2152,11 @@ yyreduce:
         newSymbol(table, (yyvsp[0].lex).id, (yyvsp[-1].lex).id, "FUNC     ", (yyvsp[0].lex).line, (yyvsp[0].lex).col, stack[scope_pos], -1, -1);
         (yyval.treeNode) = newNode(strcat(strcat((yyvsp[-1].lex).id," function "), (yyvsp[0].lex).id), checkType(table, (yyvsp[0].lex).id, stack[scope_pos], 1), 0, " ");
     }
-#line 2158 "src/sin_analyser.tab.c"
+#line 2156 "src/sin_analyser.tab.c"
     break;
 
   case 21:
-#line 293 "src/sin_analyser.y"
+#line 291 "src/sin_analyser.y"
                  {
         strcat(tacCode, "_");
         strcat(tacCode, (yyvsp[0].lex).id);
@@ -2172,11 +2170,11 @@ yyreduce:
         newSymbol(table, (yyvsp[0].lex).id, strcat((yyvsp[-2].lex).id," list"), "LIST FUNC", (yyvsp[0].lex).line, (yyvsp[0].lex).col, scope, -1, -1);
         (yyval.treeNode) = newNode(strcat(strcat((yyvsp[-2].lex).id," function list "), (yyvsp[0].lex).id), checkType(table, (yyvsp[0].lex).id, stack[scope_pos], 1), 0, " ");
     }
-#line 2176 "src/sin_analyser.tab.c"
+#line 2174 "src/sin_analyser.tab.c"
     break;
 
   case 22:
-#line 309 "src/sin_analyser.y"
+#line 307 "src/sin_analyser.y"
                     {
         (yyval.treeNode) = newNode("BLOCK", 0, 0, " ");
         (yyval.treeNode)->subtree1 = (yyvsp[-1].treeNode);
@@ -2184,11 +2182,11 @@ yyreduce:
         if((yyval.treeNode)->subtree1->ret || (yyval.treeNode)->subtree2->ret) (yyval.treeNode)->ret = 1;
         (yyval.treeNode)->type = (yyval.treeNode)->subtree2->type;
     }
-#line 2188 "src/sin_analyser.tab.c"
+#line 2186 "src/sin_analyser.tab.c"
     break;
 
   case 23:
-#line 317 "src/sin_analyser.y"
+#line 315 "src/sin_analyser.y"
                  {
         (yyval.treeNode) = newNode("BLOCK", 0, 0, " ");
         (yyval.treeNode)->subtree1 = (yyvsp[-1].treeNode);
@@ -2196,64 +2194,64 @@ yyreduce:
         if((yyval.treeNode)->subtree1->ret || (yyval.treeNode)->subtree2->ret) (yyval.treeNode)->ret = 1;
         (yyval.treeNode)->type = (yyval.treeNode)->subtree2->type;
     }
-#line 2200 "src/sin_analyser.tab.c"
+#line 2198 "src/sin_analyser.tab.c"
     break;
 
   case 24:
-#line 325 "src/sin_analyser.y"
+#line 323 "src/sin_analyser.y"
               { (yyval.treeNode) = (yyvsp[0].treeNode); }
-#line 2206 "src/sin_analyser.tab.c"
+#line 2204 "src/sin_analyser.tab.c"
     break;
 
   case 25:
-#line 327 "src/sin_analyser.y"
+#line 325 "src/sin_analyser.y"
            { (yyval.treeNode) = (yyvsp[0].treeNode); }
-#line 2212 "src/sin_analyser.tab.c"
+#line 2210 "src/sin_analyser.tab.c"
     break;
 
   case 26:
-#line 329 "src/sin_analyser.y"
+#line 327 "src/sin_analyser.y"
           { (yyval.treeNode) = newNode("ERROR", 0, 0, " "); }
-#line 2218 "src/sin_analyser.tab.c"
+#line 2216 "src/sin_analyser.tab.c"
     break;
 
   case 27:
-#line 333 "src/sin_analyser.y"
+#line 331 "src/sin_analyser.y"
              { (yyval.treeNode) = (yyvsp[-1].treeNode); }
-#line 2224 "src/sin_analyser.tab.c"
+#line 2222 "src/sin_analyser.tab.c"
     break;
 
   case 28:
-#line 335 "src/sin_analyser.y"
+#line 333 "src/sin_analyser.y"
               { (yyval.treeNode) = (yyvsp[-1].treeNode); }
-#line 2230 "src/sin_analyser.tab.c"
+#line 2228 "src/sin_analyser.tab.c"
     break;
 
   case 29:
-#line 337 "src/sin_analyser.y"
+#line 335 "src/sin_analyser.y"
        {
         changeScope(1);
     }
-#line 2238 "src/sin_analyser.tab.c"
+#line 2236 "src/sin_analyser.tab.c"
     break;
 
   case 30:
-#line 339 "src/sin_analyser.y"
+#line 337 "src/sin_analyser.y"
                { 
         (yyval.treeNode) = (yyvsp[-1].treeNode);
         changeScope(0);
     }
-#line 2247 "src/sin_analyser.tab.c"
+#line 2245 "src/sin_analyser.tab.c"
     break;
 
   case 31:
-#line 344 "src/sin_analyser.y"
+#line 342 "src/sin_analyser.y"
              { (yyval.treeNode) = (yyvsp[0].treeNode); }
-#line 2253 "src/sin_analyser.tab.c"
+#line 2251 "src/sin_analyser.tab.c"
     break;
 
   case 32:
-#line 348 "src/sin_analyser.y"
+#line 346 "src/sin_analyser.y"
     {
         strcat(tacCode, "// if\n");
         sprintf(if_loop, "L%d", loop);
@@ -2261,47 +2259,47 @@ yyreduce:
         loop++;
         if_start = 1;
     }
-#line 2265 "src/sin_analyser.tab.c"
+#line 2263 "src/sin_analyser.tab.c"
     break;
 
   case 33:
-#line 354 "src/sin_analyser.y"
+#line 352 "src/sin_analyser.y"
              { (yyval.treeNode) = (yyvsp[0].treeNode); }
-#line 2271 "src/sin_analyser.tab.c"
+#line 2269 "src/sin_analyser.tab.c"
     break;
 
   case 34:
-#line 356 "src/sin_analyser.y"
+#line 354 "src/sin_analyser.y"
         { (yyval.treeNode) = (yyvsp[0].treeNode); }
-#line 2277 "src/sin_analyser.tab.c"
+#line 2275 "src/sin_analyser.tab.c"
     break;
 
   case 35:
-#line 358 "src/sin_analyser.y"
+#line 356 "src/sin_analyser.y"
                { (yyval.treeNode) = (yyvsp[-1].treeNode); }
-#line 2283 "src/sin_analyser.tab.c"
+#line 2281 "src/sin_analyser.tab.c"
     break;
 
   case 36:
-#line 362 "src/sin_analyser.y"
+#line 360 "src/sin_analyser.y"
               { (yyval.treeNode) = (yyvsp[0].treeNode); }
-#line 2289 "src/sin_analyser.tab.c"
+#line 2287 "src/sin_analyser.tab.c"
     break;
 
   case 37:
-#line 364 "src/sin_analyser.y"
+#line 362 "src/sin_analyser.y"
           { (yyval.treeNode) = (yyvsp[0].treeNode); }
-#line 2295 "src/sin_analyser.tab.c"
+#line 2293 "src/sin_analyser.tab.c"
     break;
 
   case 38:
-#line 366 "src/sin_analyser.y"
+#line 364 "src/sin_analyser.y"
            { (yyval.treeNode) = (yyvsp[0].treeNode); }
-#line 2301 "src/sin_analyser.tab.c"
+#line 2299 "src/sin_analyser.tab.c"
     break;
 
   case 39:
-#line 370 "src/sin_analyser.y"
+#line 368 "src/sin_analyser.y"
                                             {
         (yyval.treeNode) = newNode("IF", 0, 0, " ");
         (yyval.treeNode)->subtree1 = (yyvsp[-2].treeNode);
@@ -2311,11 +2309,11 @@ yyreduce:
         strcat(tacCode, ":\n");
         ifs--;
     }
-#line 2315 "src/sin_analyser.tab.c"
+#line 2313 "src/sin_analyser.tab.c"
     break;
 
   case 40:
-#line 380 "src/sin_analyser.y"
+#line 378 "src/sin_analyser.y"
                                       {
         if(ifs == 0){
             sprintf(end_loop1, "L%d", loop);
@@ -2351,11 +2349,11 @@ yyreduce:
             strcat(tacCode, ":\n");
         }
     }
-#line 2355 "src/sin_analyser.tab.c"
+#line 2353 "src/sin_analyser.tab.c"
     break;
 
   case 41:
-#line 414 "src/sin_analyser.y"
+#line 412 "src/sin_analyser.y"
                 {
         (yyval.treeNode) = newNode("IF ELSE", 0, 0, " ");
         (yyval.treeNode)->subtree1 = (yyvsp[-5].treeNode);
@@ -2370,11 +2368,11 @@ yyreduce:
         ifs--;
         
     }
-#line 2374 "src/sin_analyser.tab.c"
+#line 2372 "src/sin_analyser.tab.c"
     break;
 
   case 42:
-#line 431 "src/sin_analyser.y"
+#line 429 "src/sin_analyser.y"
                      {
         strcat(tacCode, "// for\n");
         sprintf(for_loop1, "L%d", loop);
@@ -2388,11 +2386,11 @@ yyreduce:
         strcat(tacCode, for_loop1);
         strcat(tacCode, ":\n");
     }
-#line 2392 "src/sin_analyser.tab.c"
+#line 2390 "src/sin_analyser.tab.c"
     break;
 
   case 43:
-#line 443 "src/sin_analyser.y"
+#line 441 "src/sin_analyser.y"
                 {
         strcat(tacCode, "jump ");
         strcat(tacCode, for_loop2);
@@ -2400,11 +2398,11 @@ yyreduce:
         strcat(tacCode, for_loop4);
         strcat(tacCode, ":\n");
     }
-#line 2404 "src/sin_analyser.tab.c"
+#line 2402 "src/sin_analyser.tab.c"
     break;
 
   case 44:
-#line 449 "src/sin_analyser.y"
+#line 447 "src/sin_analyser.y"
                     {
         strcat(tacCode, "jump ");
         strcat(tacCode, for_loop1);
@@ -2412,11 +2410,11 @@ yyreduce:
         strcat(tacCode, for_loop3);
         strcat(tacCode, ":\n");
     }
-#line 2416 "src/sin_analyser.tab.c"
+#line 2414 "src/sin_analyser.tab.c"
     break;
 
   case 45:
-#line 455 "src/sin_analyser.y"
+#line 453 "src/sin_analyser.y"
                {
         (yyval.treeNode) = newNode("FOR", 0, 0, " ");
         (yyval.treeNode)->subtree1 = (yyvsp[-9].treeNode);
@@ -2435,11 +2433,11 @@ yyreduce:
         strcat(tacCode, (yyval.treeNode)->subtree2->tac);
         strcat(tacCode, "\n");
     }
-#line 2439 "src/sin_analyser.tab.c"
+#line 2437 "src/sin_analyser.tab.c"
     break;
 
   case 46:
-#line 476 "src/sin_analyser.y"
+#line 474 "src/sin_analyser.y"
                      {
         (yyval.treeNode) = newNode("RETURN", 0, 1, " ");
         (yyval.treeNode)->subtree1 = (yyvsp[0].treeNode);
@@ -2452,11 +2450,11 @@ yyreduce:
             return_type = (yyval.treeNode)->subtree1->type;
         }
     }
-#line 2456 "src/sin_analyser.tab.c"
+#line 2454 "src/sin_analyser.tab.c"
     break;
 
   case 47:
-#line 491 "src/sin_analyser.y"
+#line 489 "src/sin_analyser.y"
                 {
         (yyval.treeNode) = newNode("IN", 0, 0, " ");
         (yyval.treeNode)->subtree1 = (yyvsp[-1].treeNode);
@@ -2467,11 +2465,11 @@ yyreduce:
         strcat(tacCode, (yyval.treeNode)->subtree1->tac);
         strcat(tacCode, ", $665\n");
     }
-#line 2471 "src/sin_analyser.tab.c"
+#line 2469 "src/sin_analyser.tab.c"
     break;
 
   case 48:
-#line 504 "src/sin_analyser.y"
+#line 502 "src/sin_analyser.y"
                         { 
         (yyval.treeNode) = newNode("OUT", 0, 0, " ");
         (yyval.treeNode)->subtree1 = (yyvsp[-1].treeNode);
@@ -2513,11 +2511,11 @@ yyreduce:
         }
         if(!strcmp((yyvsp[-3].lex).id, "writeln")) strcat(tacCode, "print '\\n' \n");
     }
-#line 2517 "src/sin_analyser.tab.c"
+#line 2515 "src/sin_analyser.tab.c"
     break;
 
   case 49:
-#line 548 "src/sin_analyser.y"
+#line 546 "src/sin_analyser.y"
                         {
         (yyval.treeNode) = newNode("ASSIGN", 0, 0, " ");
         (yyval.treeNode)->subtree1 = (yyvsp[-2].treeNode);
@@ -2675,11 +2673,11 @@ yyreduce:
             }
         }
     }
-#line 2679 "src/sin_analyser.tab.c"
+#line 2677 "src/sin_analyser.tab.c"
     break;
 
   case 50:
-#line 708 "src/sin_analyser.y"
+#line 706 "src/sin_analyser.y"
            {
         (yyval.treeNode) = newNode("OP", 0, 0, " ");
         (yyval.treeNode)->subtree1 = (yyvsp[0].treeNode);
@@ -2695,11 +2693,11 @@ yyreduce:
             if_start = 0;
         } 
     }
-#line 2699 "src/sin_analyser.tab.c"
+#line 2697 "src/sin_analyser.tab.c"
     break;
 
   case 51:
-#line 726 "src/sin_analyser.y"
+#line 724 "src/sin_analyser.y"
                           {
         (yyval.treeNode) = newNode("LOG OP", 0, 0, " ");
         (yyval.treeNode)->subtree1 = (yyvsp[-2].treeNode);
@@ -2779,17 +2777,17 @@ yyreduce:
             sem_errors++;
         }
     }
-#line 2783 "src/sin_analyser.tab.c"
+#line 2781 "src/sin_analyser.tab.c"
     break;
 
   case 52:
-#line 806 "src/sin_analyser.y"
+#line 804 "src/sin_analyser.y"
            { (yyval.treeNode) = (yyvsp[0].treeNode); }
-#line 2789 "src/sin_analyser.tab.c"
+#line 2787 "src/sin_analyser.tab.c"
     break;
 
   case 53:
-#line 810 "src/sin_analyser.y"
+#line 808 "src/sin_analyser.y"
                           {
         (yyval.treeNode) = newNode("REL OP", 0, 0, " ");
         (yyval.treeNode)->subtree1 = (yyvsp[-2].treeNode);
@@ -3135,17 +3133,17 @@ yyreduce:
             sem_errors++;
         }
     }
-#line 3139 "src/sin_analyser.tab.c"
+#line 3137 "src/sin_analyser.tab.c"
     break;
 
   case 54:
-#line 1156 "src/sin_analyser.y"
+#line 1154 "src/sin_analyser.y"
             { (yyval.treeNode) = (yyvsp[0].treeNode); }
-#line 3145 "src/sin_analyser.tab.c"
+#line 3143 "src/sin_analyser.tab.c"
     break;
 
   case 55:
-#line 1160 "src/sin_analyser.y"
+#line 1158 "src/sin_analyser.y"
                              {
         (yyval.treeNode) = newNode("LIST FUNC", 0, 0, " ");
         (yyval.treeNode)->subtree1 = (yyvsp[-2].treeNode);
@@ -3249,11 +3247,11 @@ yyreduce:
         }
         strcpy((yyval.treeNode)->tac, (yyval.treeNode)->subtree2->tac);
     }
-#line 3253 "src/sin_analyser.tab.c"
+#line 3251 "src/sin_analyser.tab.c"
     break;
 
   case 56:
-#line 1264 "src/sin_analyser.y"
+#line 1262 "src/sin_analyser.y"
                             {
         (yyval.treeNode) = newNode("LIST OP", 0, 0, " ");
         (yyval.treeNode)->subtree1 = (yyvsp[-2].treeNode);
@@ -3302,17 +3300,17 @@ yyreduce:
             sem_errors++;
         }
     }
-#line 3306 "src/sin_analyser.tab.c"
+#line 3304 "src/sin_analyser.tab.c"
     break;
 
   case 57:
-#line 1313 "src/sin_analyser.y"
+#line 1311 "src/sin_analyser.y"
            { (yyval.treeNode) = (yyvsp[0].treeNode); }
-#line 3312 "src/sin_analyser.tab.c"
+#line 3310 "src/sin_analyser.tab.c"
     break;
 
   case 58:
-#line 1317 "src/sin_analyser.y"
+#line 1315 "src/sin_analyser.y"
                        {
         (yyval.treeNode) = newNode("ARI SS OP", 0, 0, " ");
         (yyval.treeNode)->subtree1 = (yyvsp[-2].treeNode);
@@ -3390,11 +3388,11 @@ yyreduce:
             sem_errors++;
         }
     }
-#line 3394 "src/sin_analyser.tab.c"
+#line 3392 "src/sin_analyser.tab.c"
     break;
 
   case 59:
-#line 1395 "src/sin_analyser.y"
+#line 1393 "src/sin_analyser.y"
                 {
         (yyval.treeNode) = newNode("NEGATIVE", 0, 0, " ");
         (yyval.treeNode)->subtree1 = (yyvsp[0].treeNode);
@@ -3413,17 +3411,17 @@ yyreduce:
              (yyval.treeNode)->type = (yyval.treeNode)->subtree1->type;
         }
     }
-#line 3417 "src/sin_analyser.tab.c"
+#line 3415 "src/sin_analyser.tab.c"
     break;
 
   case 60:
-#line 1414 "src/sin_analyser.y"
+#line 1412 "src/sin_analyser.y"
           { (yyval.treeNode) = (yyvsp[0].treeNode); }
-#line 3423 "src/sin_analyser.tab.c"
+#line 3421 "src/sin_analyser.tab.c"
     break;
 
   case 61:
-#line 1418 "src/sin_analyser.y"
+#line 1416 "src/sin_analyser.y"
                       {
         (yyval.treeNode) = newNode("ARI MD OP", 0, 0, " ");
         (yyval.treeNode)->subtree1 = (yyvsp[-2].treeNode);
@@ -3501,17 +3499,17 @@ yyreduce:
             sem_errors++;
         }
     }
-#line 3505 "src/sin_analyser.tab.c"
+#line 3503 "src/sin_analyser.tab.c"
     break;
 
   case 62:
-#line 1496 "src/sin_analyser.y"
+#line 1494 "src/sin_analyser.y"
           { (yyval.treeNode) = (yyvsp[0].treeNode); }
-#line 3511 "src/sin_analyser.tab.c"
+#line 3509 "src/sin_analyser.tab.c"
     break;
 
   case 63:
-#line 1500 "src/sin_analyser.y"
+#line 1498 "src/sin_analyser.y"
                 {
         (yyval.treeNode) = newNode("UNARY OP", 0, 0, " ");
         (yyval.treeNode)->subtree1 = (yyvsp[0].treeNode);
@@ -3620,53 +3618,53 @@ yyreduce:
             sem_errors++;
         }
     }
-#line 3624 "src/sin_analyser.tab.c"
+#line 3622 "src/sin_analyser.tab.c"
     break;
 
   case 64:
-#line 1609 "src/sin_analyser.y"
+#line 1607 "src/sin_analyser.y"
         { (yyval.treeNode) = (yyvsp[0].treeNode); }
-#line 3630 "src/sin_analyser.tab.c"
+#line 3628 "src/sin_analyser.tab.c"
     break;
 
   case 65:
-#line 1613 "src/sin_analyser.y"
+#line 1611 "src/sin_analyser.y"
        { (yyval.treeNode) = (yyvsp[0].treeNode); }
-#line 3636 "src/sin_analyser.tab.c"
+#line 3634 "src/sin_analyser.tab.c"
     break;
 
   case 66:
-#line 1615 "src/sin_analyser.y"
+#line 1613 "src/sin_analyser.y"
               { (yyval.treeNode) = (yyvsp[0].treeNode); }
-#line 3642 "src/sin_analyser.tab.c"
+#line 3640 "src/sin_analyser.tab.c"
     break;
 
   case 67:
-#line 1617 "src/sin_analyser.y"
+#line 1615 "src/sin_analyser.y"
                     { (yyval.treeNode) = (yyvsp[-1].treeNode); }
-#line 3648 "src/sin_analyser.tab.c"
+#line 3646 "src/sin_analyser.tab.c"
     break;
 
   case 68:
-#line 1619 "src/sin_analyser.y"
+#line 1617 "src/sin_analyser.y"
         { (yyval.treeNode) = newNode((yyvsp[0].lex).id, 1, 0, (yyvsp[0].lex).id); }
-#line 3654 "src/sin_analyser.tab.c"
+#line 3652 "src/sin_analyser.tab.c"
     break;
 
   case 69:
-#line 1621 "src/sin_analyser.y"
+#line 1619 "src/sin_analyser.y"
           { (yyval.treeNode) = newNode((yyvsp[0].lex).id, 2, 0, (yyvsp[0].lex).id); }
-#line 3660 "src/sin_analyser.tab.c"
+#line 3658 "src/sin_analyser.tab.c"
     break;
 
   case 70:
-#line 1623 "src/sin_analyser.y"
+#line 1621 "src/sin_analyser.y"
         { (yyval.treeNode) = newNode("NIL", 3, 0, (yyvsp[0].lex).id); }
-#line 3666 "src/sin_analyser.tab.c"
+#line 3664 "src/sin_analyser.tab.c"
     break;
 
   case 71:
-#line 1625 "src/sin_analyser.y"
+#line 1623 "src/sin_analyser.y"
             {
         strcat(tacTable, "char ");
         sprintf(str_num, "_s%d", str);
@@ -3677,19 +3675,19 @@ yyreduce:
         str++;
         (yyval.treeNode) = newNode((yyvsp[0].lex).id, 0, 0, str_num); 
     }
-#line 3681 "src/sin_analyser.tab.c"
+#line 3679 "src/sin_analyser.tab.c"
     break;
 
   case 72:
-#line 1638 "src/sin_analyser.y"
+#line 1636 "src/sin_analyser.y"
           {
         call_scope = searchTable(table, (yyvsp[-1].lex).id, 1, 1, stack, scope_pos);
     }
-#line 3689 "src/sin_analyser.tab.c"
+#line 3687 "src/sin_analyser.tab.c"
     break;
 
   case 73:
-#line 1640 "src/sin_analyser.y"
+#line 1638 "src/sin_analyser.y"
                      {
         if(!call_scope){
             printf("SEMANTIC ERROR: Function '%s' not declared [%d, %d]\n", (yyvsp[-4].lex).id, (yyvsp[-4].lex).line, (yyvsp[-4].lex).col);
@@ -3723,11 +3721,11 @@ yyreduce:
         args = 0;
 
     }
-#line 3727 "src/sin_analyser.tab.c"
+#line 3725 "src/sin_analyser.tab.c"
     break;
 
   case 74:
-#line 1674 "src/sin_analyser.y"
+#line 1672 "src/sin_analyser.y"
              {
         if(!searchTable(table, (yyvsp[-2].lex).id, 1, 1, stack, scope_pos)){
             printf("SEMANTIC ERROR: Function %s not declared [%d, %d]\n", (yyvsp[-2].lex).id, (yyvsp[-2].lex).line, (yyvsp[-2].lex).col);
@@ -3742,11 +3740,11 @@ yyreduce:
         strcat(tacCode, (yyvsp[-2].lex).id);
         strcat(tacCode, ", 0\n");
     }
-#line 3746 "src/sin_analyser.tab.c"
+#line 3744 "src/sin_analyser.tab.c"
     break;
 
   case 75:
-#line 1691 "src/sin_analyser.y"
+#line 1689 "src/sin_analyser.y"
        { 
         if(!searchTable(table, (yyvsp[0].lex).id, 0, 0, stack, scope_pos)){
             printf("SEMANTIC ERROR: Variable %s not declared [%d, %d]\n", (yyvsp[0].lex).id, (yyvsp[0].lex).line, (yyvsp[0].lex).col);
@@ -3763,11 +3761,11 @@ yyreduce:
         else
             (yyval.treeNode) = newNode((yyvsp[0].lex).id, checkType(table, (yyvsp[0].lex).id, stack[scope_pos], 1), 0, tac); 
     }
-#line 3767 "src/sin_analyser.tab.c"
+#line 3765 "src/sin_analyser.tab.c"
     break;
 
   case 76:
-#line 1710 "src/sin_analyser.y"
+#line 1708 "src/sin_analyser.y"
                                    {
         args++;
         (yyval.treeNode) = newNode("PARAMS", 0, 0, " ");
@@ -3780,13 +3778,12 @@ yyreduce:
             param_error = 1;
         else if((yyval.treeNode)->subtree2->type > 2 && checkParamType(table, args, call_scope-1) < 3)
             param_error = 1;
-        // printf("asub type: %d, check type: %d, args: %d, call: %d\n", $$->subtree2->type, checkParamType(table, args, call_scope-1), args, call_scope);
     }
-#line 3786 "src/sin_analyser.tab.c"
+#line 3783 "src/sin_analyser.tab.c"
     break;
 
   case 77:
-#line 1725 "src/sin_analyser.y"
+#line 1722 "src/sin_analyser.y"
               { 
         args++;
         (yyval.treeNode) = newNode("PARAMS", 0, 0, " ");
@@ -3798,13 +3795,12 @@ yyreduce:
             param_error = 1;
         else if((yyval.treeNode)->subtree1->type > 2 && checkParamType(table, args, call_scope-1) < 3)
             param_error = 1;
-        // printf("bsub type: %d, check type: %d, args: %d, call: %d\n", $$->subtree1->type, checkParamType(table, args, call_scope-1), args, call_scope);
     }
-#line 3804 "src/sin_analyser.tab.c"
+#line 3800 "src/sin_analyser.tab.c"
     break;
 
 
-#line 3808 "src/sin_analyser.tab.c"
+#line 3804 "src/sin_analyser.tab.c"
 
       default: break;
     }
@@ -4036,7 +4032,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 1740 "src/sin_analyser.y"
+#line 1736 "src/sin_analyser.y"
 
 
 extern void changeScope(int op){
@@ -4044,18 +4040,10 @@ extern void changeScope(int op){
         scope++;
         scope_pos++;
         stack[scope_pos] = scope;
-        // for(int i=0; i<10; i++){
-        //     printf("%d ", stack[i]);
-        // }
-        // printf("\n%d, %d, %d\n", scope_pos, scope, stack[scope_pos]);
     }
     else{
         stack[scope_pos] = 0;
         scope_pos--;
-        // for(int i=0; i<10; i++){
-        //     printf("%d ", stack[i]);
-        // }
-        // printf("\n%d, %d, %d\n", scope_pos, scope, stack[scope_pos]);
     }
 }
 
@@ -4064,7 +4052,7 @@ int main(int argc, char **argv){
     printf("Analysis in file '%s'", argv[1]);
     printf("\n────────────────────────────────────────\n");
     
-    int i = 0; // Pula os primeiros caracteres "tests/"
+    int i = 0;
     while(++i){
         tacFile[i-1] = argv[1][i-1];
         if(tacFile[i-1] == '.' || i > 100) break;
