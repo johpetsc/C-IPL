@@ -93,7 +93,7 @@ extern void updateParams(symbol* identifier, int params){
 
 extern int checkScope(symbol* identifier, char* id, int scope){
     int flag = 0;
-    while(!flag){
+    while(!flag && scope>=0){
         for(int i = 0; i < table_size; i++){
             if(!strcmp(identifier[i].id, id) && identifier[i].scope == scope){
                 return scope;

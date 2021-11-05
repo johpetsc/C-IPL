@@ -21,36 +21,15 @@
     char tacTable[10000];
     char tacCode[100000];
     char tacFile[100];
-    int reg = 0;
-    int str = 0;
-    int loop = 0;
-    int scope_pos = 0;
-    int scope = 0;
-    int param = 0;
-    int params = 0;
-    int args_ret = 0;
-    int call_scope;
-    int id_scope;
-    int param_error = 0;
-    int args = 0;
-    char reg_num[5];
-    char str_num[5];
-    char loop_num[5];
-    char for_loop1[5];
-    char for_loop2[5];
-    char for_loop3[5];
-    char list_loop1[5];
-    char list_loop2[5];
-    char list_loop3[5];
-    char list_loop4[5];
-    char if_loop[5];
-    char else_loop[5];
-    char end_loop[5];
-    char finish_loop[5];
+    int reg, str, loop, scope_pos, scope, param, params, args_ret, call_scope, id_scope, param_error, args, return_type;
+    int ifs, if_start, main_found, sin_errors, sem_errors;
+    char reg_num[5], str_num[5], loop_num[5];
+    char for_loop1[5], for_loop2[5], for_loop3[5], for_loop4[5];
+    char list_loop1[5], list_loop2[5], list_loop3[5], list_loop4[5];
+    char if_loop[5], else_loop[5], finish_loop[5];
+    char end_loop1[5], end_loop2[5], end_loop3[5], end_loop4[5];
     char tac[100];
-    int main_found = 0;
-    int sin_errors = 0;
-    int sem_errors = 0;
+    char current_return[100];
     char list_int[1000] = "{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}";
     char list_float[1000] = "{.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0,.0}";
     /*Symbol table*/
@@ -94,7 +73,7 @@
 %type <treeNode> start
 %type <treeNode> program program_block
 %type <treeNode> declar func_dclr params func param
-%type <treeNode> block statement if_statement expr operation val
+%type <treeNode> block statement expr operation val
 %type <treeNode> flow_ctr if_else for return
 %type <treeNode> ass_op un_op log_op rel_op ari_op md_op
 %type <treeNode> input output
@@ -366,7 +345,13 @@ statement:
 ;
 
 flow_ctr:
-    if_else { $$ = $1; }
+    {
+        strcat(tacCode, "// if\n");
+        sprintf(if_loop, "L%d", loop);
+        ifs++;
+        loop++;
+        if_start = 1;
+    }if_else { $$ = $2; }
     |
     for { $$ = $1; }
     |
@@ -381,81 +366,64 @@ expr:
     output { $$ = $1; }
 ;
 
-if_statement:
-    expr END { $$ = $1; }
-    |
-    ass_op END{ $$ = $1; }
-    |
-    LB {
-        strcat(tacCode, "// if\n");
-        sprintf(if_loop, "L%d", loop);
-        loop++;
-        sprintf(end_loop, "L%d", loop);
-        loop++;
-        strcat(tacCode, "jump ");
-        strcat(tacCode, end_loop);
-        strcat(tacCode, "\n");
-        strcat(tacCode, if_loop);
-        strcat(tacCode, ":\n");
-        strcat(tacCode, "not ");
-        strcat(tacCode, reg_num);
-        strcat(tacCode, ", ");
-        strcat(tacCode, reg_num);
-        strcat(tacCode, "\n");
-        changeScope(1);
-    } block RB { 
-        $$ = $3;
-        changeScope(0);
-    }
-    | 
-    flow_ctr { $$ = $1; }
-;
-
 if_else:
-    IF LP operation RP if_statement %prec ELSE {
+    IF LP operation RP statement %prec ELSE {
         $$ = newNode("IF", 0, 0, " ");
         $$->subtree1 = $3;
         $$->subtree2 = $5;
         $$->type = $$->subtree2->type;
-        strcat(tacCode, end_loop);
-        strcat(tacCode, ":\nbrnz ");
         strcat(tacCode, if_loop);
-        strcat(tacCode, ", ");
-        strcat(tacCode, $$->subtree1->tac);
-        strcat(tacCode, "\n");
+        strcat(tacCode, ":\n");
+        ifs--;
     }
     | 
-    IF LP operation RP if_statement ELSE {
-        strcat(tacCode, "// if\n");
-        sprintf(else_loop, "L%d", loop);
-        loop++;
-        sprintf(finish_loop, "L%d", loop);
-        loop++;
-        strcat(tacCode, "jump ");
-        strcat(tacCode, finish_loop);
-        strcat(tacCode, "\n");
-        strcat(tacCode, else_loop);
-        strcat(tacCode, ":\n");
+    IF LP operation RP statement ELSE {
+        if(ifs == 0){
+            sprintf(end_loop1, "L%d", loop);
+            loop++;
+            strcat(tacCode, "jump ");
+            strcat(tacCode, end_loop1);
+            strcat(tacCode, "\n");
+            strcat(tacCode, if_loop);
+            strcat(tacCode, ":\n");
+        }else if(ifs == 1){
+            sprintf(end_loop2, "L%d", loop);
+            loop++;
+            strcat(tacCode, "jump ");
+            strcat(tacCode, end_loop2);
+            strcat(tacCode, "\n");
+            strcat(tacCode, if_loop);
+            strcat(tacCode, ":\n");
+        }else if(ifs == 2){
+            sprintf(end_loop3, "L%d", loop);
+            loop++;
+            strcat(tacCode, "jump ");
+            strcat(tacCode, end_loop3);
+            strcat(tacCode, "\n");
+            strcat(tacCode, if_loop);
+            strcat(tacCode, ":\n");
+        }else {
+            sprintf(end_loop4, "L%d", loop);
+            loop++;
+            strcat(tacCode, "jump ");
+            strcat(tacCode, end_loop4);
+            strcat(tacCode, "\n");
+            strcat(tacCode, if_loop);
+            strcat(tacCode, ":\n");
+        }
     } statement {
         $$ = newNode("IF ELSE", 0, 0, " ");
         $$->subtree1 = $3;
         $$->subtree2 = $5;
         $$->subtree3 = $8;
         $$->type = $$->subtree3->type;
-        strcat(tacCode, "jump ");
-        strcat(tacCode, finish_loop);
-        strcat(tacCode, "\n");
-        strcat(tacCode, end_loop);
-        strcat(tacCode, ":\nbrnz ");
-        strcat(tacCode, if_loop);
-        strcat(tacCode, ", ");
-        strcat(tacCode, $$->subtree1->tac);
-        strcat(tacCode, "\n");
-        strcat(tacCode, "jump ");
-        strcat(tacCode, else_loop);
-        strcat(tacCode, "\n");
-        strcat(tacCode, finish_loop);
+        if(ifs == 0) strcat(tacCode, end_loop1);
+        else if(ifs == 1) strcat(tacCode, end_loop2);
+        else if(ifs == 2) strcat(tacCode, end_loop3);
+        else strcat(tacCode, end_loop4);
         strcat(tacCode, ":\n");
+        ifs--;
+        
     }
 ;
 
@@ -468,23 +436,31 @@ for:
         loop++;
         sprintf(for_loop3, "L%d", loop);
         loop++;
+        sprintf(for_loop4, "L%d", loop);
+        loop++;
         strcat(tacCode, for_loop1);
         strcat(tacCode, ":\n");
     } operation {
         strcat(tacCode, "jump ");
         strcat(tacCode, for_loop2);
         strcat(tacCode, "\n");
+        strcat(tacCode, for_loop4);
+        strcat(tacCode, ":\n");
+    } END ass_op RP {
+        strcat(tacCode, "jump ");
+        strcat(tacCode, for_loop1);
+        strcat(tacCode, "\n");
         strcat(tacCode, for_loop3);
         strcat(tacCode, ":\n");
-    } END ass_op RP statement {
+    }statement {
         $$ = newNode("FOR", 0, 0, " ");
         $$->subtree1 = $3;
         $$->subtree2 = $6;
         $$->subtree3 = $9;
-        $$->subtree4 = $11;
+        $$->subtree4 = $12;
         $$->type = $$->subtree4->type;
         strcat(tacCode, "jump ");
-        strcat(tacCode, for_loop1);
+        strcat(tacCode, for_loop4);
         strcat(tacCode, "\n");
         strcat(tacCode, for_loop2);
         strcat(tacCode, ":\n");
@@ -504,6 +480,10 @@ return:
         strcat(tacCode, "return ");
         strcat(tacCode, $$->subtree1->tac);
         strcat(tacCode, "\n");
+        if($$->subtree1->type > 2){
+            strcpy(current_return, $$->subtree1->tac);
+            return_type = $$->subtree1->type;
+        }
     }
 ;
 
@@ -512,10 +492,11 @@ input:
         $$ = newNode("IN", 0, 0, " ");
         $$->subtree1 = $3;
         strcat(tacCode, "// in\n");
-        if($$->subtree1->type == 1) strcat(tacCode, "scani ");
-        else strcat(tacCode, "scanf ");
+        strcat(tacCode, "scanf $665\n");
+        if($$->subtree1->type == 1) strcat(tacCode, "fltoint $665, $665\n");
+         strcat(tacCode, "mov ");
         strcat(tacCode, $$->subtree1->tac);
-        strcat(tacCode, "\n");
+        strcat(tacCode, ", $665\n");
     }
 ;
 
@@ -592,13 +573,6 @@ ass_op:
             }
         } else if($$->subtree1->type == 2){
             if($$->subtree2->type == 1){
-                strcat(tacCode, "mov ");
-                strcat(tacCode, $$->subtree1->tac);
-                strcat(tacCode, ", ");
-                strcat(tacCode, $$->subtree2->tac);
-                strcat(tacCode, "\n");
-                $$->type = $$->subtree1->type;
-            }else if($$->subtree2->type == 2){
                 strcat(tacCode, "mov $700, ");
                 strcat(tacCode, $$->subtree2->tac);
                 strcat(tacCode, "\n");
@@ -606,6 +580,13 @@ ass_op:
                 strcat(tacCode, "mov ");
                 strcat(tacCode, $$->subtree1->tac);
                 strcat(tacCode, ", $700\n");
+                $$->type = $$->subtree1->type;
+            }else if($$->subtree2->type == 2){
+                strcat(tacCode, "mov ");
+                strcat(tacCode, $$->subtree1->tac);
+                strcat(tacCode, ", ");
+                strcat(tacCode, $$->subtree2->tac);
+                strcat(tacCode, "\n");
                 $$->type = $$->subtree2->type;
             }else{
                 printf("SEMANTIC ERROR: Type error when assigning %d to %d. [%d, %d]\n", $$->subtree2->type, $$->subtree1->type, $2.line, $2.col);
@@ -627,8 +608,8 @@ ass_op:
                 strcat(tacCode, ":\n");
                 strcat(tacCode, "mov $603, $500[$600]\n");
                 strcat(tacCode, "mov $400[$600], $603\n");
-                strcat(tacCode, "add $600, $600, 1\n");
                 strcat(tacCode, "sub $602, $601, $600\n");
+                strcat(tacCode, "add $600, $600, 1\n");
                 strcat(tacCode, "brnz ");
                 strcat(tacCode, loop_num);
                 strcat(tacCode, ", $602\n");
@@ -652,8 +633,8 @@ ass_op:
                 strcat(tacCode, "mov $603, $500[$600]\n");
                 strcat(tacCode, "fltoint $603, $603\n");
                 strcat(tacCode, "mov $400[$600], $603\n");
-                strcat(tacCode, "add $600, $600, 1\n");
                 strcat(tacCode, "sub $602, $601, $600\n");
+                strcat(tacCode, "add $600, $600, 1\n");
                 strcat(tacCode, "brnz ");
                 strcat(tacCode, loop_num);
                 strcat(tacCode, ", $602\n");
@@ -682,8 +663,8 @@ ass_op:
                 strcat(tacCode, "mov $603, $500[$600]\n");
                 strcat(tacCode, "inttofl $603, $603\n");
                 strcat(tacCode, "mov $400[$600], $603\n");
-                strcat(tacCode, "add $600, $600, 1\n");
                 strcat(tacCode, "sub $602, $601, $600\n");
+                strcat(tacCode, "add $600, $600, 1\n");
                 strcat(tacCode, "brnz ");
                 strcat(tacCode, loop_num);
                 strcat(tacCode, ", $602\n");
@@ -706,8 +687,8 @@ ass_op:
                 strcat(tacCode, ":\n");
                 strcat(tacCode, "mov $603, $500[$600]\n");
                 strcat(tacCode, "mov $400[$600], $603\n");
-                strcat(tacCode, "add $600, $600, 1\n");
                 strcat(tacCode, "sub $602, $601, $600\n");
+                strcat(tacCode, "add $600, $600, 1\n");
                 strcat(tacCode, "brnz ");
                 strcat(tacCode, loop_num);
                 strcat(tacCode, ", $602\n");
@@ -724,7 +705,21 @@ ass_op:
 ;
 
 operation:
-    log_op { $$ = $1; }
+    log_op {
+        $$ = newNode("OP", 0, 0, " ");
+        $$->subtree1 = $1;
+        $$->type = $$->subtree1->type;
+        strcpy($$->tac, $$->subtree1->tac);
+        strcpy($$->value, $$->subtree1->value);
+        if(if_start){
+            strcat(tacCode, "brz ");
+            strcat(tacCode, if_loop);
+            strcat(tacCode, ", ");
+            strcat(tacCode, $$->subtree1->tac);
+            strcat(tacCode, "\n");
+            if_start = 0;
+        } 
+    }
 ;
 
 log_op:
@@ -732,22 +727,35 @@ log_op:
         $$ = newNode("LOG OP", 0, 0, " ");
         $$->subtree1 = $1;
         $$->subtree2 = $3;
-        if(!strcmp($2.id, "&&")) strcat(tacCode, "and ");
-        else strcat(tacCode, "or ");
-        sprintf(reg_num, "$%d", reg);
-        strcat(tacCode, reg_num);
-        strcat(tacCode, ", ");
-        strcat(tacCode, $$->subtree1->tac);
-        strcat(tacCode, ", ");
-        strcat(tacCode, $$->subtree2->tac);
-        strcat(tacCode, "\n");
-        strcpy($$->tac, reg_num);
-        reg++;
         if($$->subtree1->type == 1){
             if($$->subtree2->type == 1){
+                if(!strcmp($2.id, "&&")) strcat(tacCode, "and ");
+                else strcat(tacCode, "or ");
+                sprintf(reg_num, "$%d", reg);
+                strcat(tacCode, reg_num);
+                strcat(tacCode, ", ");
+                strcat(tacCode, $$->subtree1->tac);
+                strcat(tacCode, ", ");
+                strcat(tacCode, $$->subtree2->tac);
+                strcat(tacCode, "\n");
+                strcpy($$->tac, reg_num);
+                reg++;
                 $$->type = 1;
             }else if($$->subtree2->type == 2){
                 $$->type = 1;
+                strcat(tacCode, "mov $700, ");
+                strcat(tacCode, $$->subtree2->tac);
+                strcat(tacCode, "\n");
+                strcat(tacCode, "fltoint $700, $700\n");
+                if(!strcmp($2.id, "&&")) strcat(tacCode, "and ");
+                else strcat(tacCode, "or ");
+                sprintf(reg_num, "$%d", reg);
+                strcat(tacCode, reg_num);
+                strcat(tacCode, ", ");
+                strcat(tacCode, $$->subtree1->tac);
+                strcat(tacCode, ", $700\n");
+                strcpy($$->tac, reg_num);
+                reg++;
             }else{
                 printf("SEMANTIC ERROR: Type error in logical operation with type %d and %d. [%d, %d]\n", $$->subtree1->type, $$->subtree2->type, $2.line, $2.col);
                 sem_errors++;
@@ -755,8 +763,36 @@ log_op:
         } else if($$->subtree1->type == 2){
             if($$->subtree2->type == 1){
                 $$->type = 1;
+                strcat(tacCode, "mov $700, ");
+                strcat(tacCode, $$->subtree1->tac);
+                strcat(tacCode, "\n");
+                strcat(tacCode, "fltoint $700, $700\n");
+                if(!strcmp($2.id, "&&")) strcat(tacCode, "and ");
+                else strcat(tacCode, "or ");
+                sprintf(reg_num, "$%d", reg);
+                strcat(tacCode, reg_num);
+                strcat(tacCode, ", $700, ");
+                strcat(tacCode, $$->subtree2->tac);
+                strcat(tacCode, "\n");
+                strcpy($$->tac, reg_num);
+                reg++;
             }else if($$->subtree2->type == 2){
                 $$->type = 1;
+                strcat(tacCode, "mov $700, ");
+                strcat(tacCode, $$->subtree1->tac);
+                strcat(tacCode, "\n");
+                strcat(tacCode, "mov $701, ");
+                strcat(tacCode, $$->subtree2->tac);
+                strcat(tacCode, "\n");
+                strcat(tacCode, "fltoint $700, $700\n");
+                strcat(tacCode, "fltoint $701, $701\n");
+                if(!strcmp($2.id, "&&")) strcat(tacCode, "and ");
+                else strcat(tacCode, "or ");
+                sprintf(reg_num, "$%d", reg);
+                strcat(tacCode, reg_num);
+                strcat(tacCode, ", $700, $701\n");
+                strcpy($$->tac, reg_num);
+                reg++;
             }else{
                 printf("SEMANTIC ERROR: Type error in logical operation with type %d and %d. [%d, %d]\n", $$->subtree1->type, $$->subtree2->type, $2.line, $2.col);
                 sem_errors++;
@@ -775,30 +811,51 @@ rel_op:
         $$ = newNode("REL OP", 0, 0, " ");
         $$->subtree1 = $1;
         $$->subtree2 = $3;
-        if(!strcmp($2.id, "==") || !strcmp($2.id, "!=")) strcat(tacCode, "seq ");
-        else if(!strcmp($2.id, ">=") || !strcmp($2.id, "<")) strcat(tacCode, "slt ");
-        else strcat(tacCode, "sleq ");
-        sprintf(reg_num, "$%d", reg);
-        strcat(tacCode, reg_num);
-        strcat(tacCode, ", ");
-        strcat(tacCode, $$->subtree1->tac);
-        strcat(tacCode, ", ");
-        strcat(tacCode, $$->subtree2->tac);
-        strcat(tacCode, "\n");
-        if(!strcmp($2.id, ">=") || !strcmp($2.id, "!=") || !strcmp($2.id, ">")){
-            strcat(tacCode, "not ");
-            strcat(tacCode, reg_num);
-            strcat(tacCode, ", ");
-            strcat(tacCode, reg_num);
-            strcat(tacCode, "\n");
-        }
-        strcpy($$->tac, reg_num);
-        reg++;
         if($$->subtree1->type == 1){
             if($$->subtree2->type == 1){
                 $$->type = 1;
+                if(!strcmp($2.id, "==") || !strcmp($2.id, "!=")) strcat(tacCode, "seq ");
+                else if(!strcmp($2.id, ">=") || !strcmp($2.id, "<")) strcat(tacCode, "slt ");
+                else strcat(tacCode, "sleq ");
+                sprintf(reg_num, "$%d", reg);
+                strcat(tacCode, reg_num);
+                strcat(tacCode, ", ");
+                strcat(tacCode, $$->subtree1->tac);
+                strcat(tacCode, ", ");
+                strcat(tacCode, $$->subtree2->tac);
+                strcat(tacCode, "\n");
+                if(!strcmp($2.id, ">=") || !strcmp($2.id, "!=") || !strcmp($2.id, ">")){
+                    strcat(tacCode, "not ");
+                    strcat(tacCode, reg_num);
+                    strcat(tacCode, ", ");
+                    strcat(tacCode, reg_num);
+                    strcat(tacCode, "\n");
+                }
+                strcpy($$->tac, reg_num);
+                reg++;
             }else if($$->subtree2->type == 2){
                 $$->type = 1;
+                strcat(tacCode, "mov $700, ");
+                strcat(tacCode, $$->subtree2->tac);
+                strcat(tacCode, "\n");
+                strcat(tacCode, "fltoint $700, $700\n");
+                if(!strcmp($2.id, "==") || !strcmp($2.id, "!=")) strcat(tacCode, "seq ");
+                else if(!strcmp($2.id, ">=") || !strcmp($2.id, "<")) strcat(tacCode, "slt ");
+                else strcat(tacCode, "sleq ");
+                sprintf(reg_num, "$%d", reg);
+                strcat(tacCode, reg_num);
+                strcat(tacCode, ", ");
+                strcat(tacCode, $$->subtree1->tac);
+                strcat(tacCode, ", $700, 1\n");
+                if(!strcmp($2.id, ">=") || !strcmp($2.id, "!=") || !strcmp($2.id, ">")){
+                    strcat(tacCode, "not ");
+                    strcat(tacCode, reg_num);
+                    strcat(tacCode, ", ");
+                    strcat(tacCode, reg_num);
+                    strcat(tacCode, "\n");
+                }
+                strcpy($$->tac, reg_num);
+                reg++;
             }else{
                 printf("SEMANTIC ERROR: Type error in relational operation with type %d and %d. [%d, %d]\n", $$->subtree1->type, $$->subtree2->type, $2.line, $2.col);
                 sem_errors++;
@@ -806,19 +863,293 @@ rel_op:
         } else if($$->subtree1->type == 2){
             if($$->subtree2->type == 1){
                 $$->type = 1;
+                strcat(tacCode, "mov $700, ");
+                strcat(tacCode, $$->subtree1->tac);
+                strcat(tacCode, "\n");
+                strcat(tacCode, "fltoint $700, $700\n");
+                if(!strcmp($2.id, "==") || !strcmp($2.id, "!=")) strcat(tacCode, "seq ");
+                else if(!strcmp($2.id, ">=") || !strcmp($2.id, "<")) strcat(tacCode, "slt ");
+                else strcat(tacCode, "sleq ");
+                sprintf(reg_num, "$%d", reg);
+                strcat(tacCode, reg_num);
+                strcat(tacCode, ", $700, ");
+                strcat(tacCode, $$->subtree2->tac);
+                strcat(tacCode, "\n");
+                if(!strcmp($2.id, ">=") || !strcmp($2.id, "!=") || !strcmp($2.id, ">")){
+                    strcat(tacCode, "not ");
+                    strcat(tacCode, reg_num);
+                    strcat(tacCode, ", ");
+                    strcat(tacCode, reg_num);
+                    strcat(tacCode, "\n");
+                }
+                strcpy($$->tac, reg_num);
+                reg++;
             }else if($$->subtree2->type == 2){
                 $$->type = 1;
+                strcat(tacCode, "mov $700, ");
+                strcat(tacCode, $$->subtree1->tac);
+                strcat(tacCode, "\n");
+                strcat(tacCode, "mov $701, ");
+                strcat(tacCode, $$->subtree2->tac);
+                strcat(tacCode, "\n");
+                strcat(tacCode, "fltoint $700, $700\n");
+                strcat(tacCode, "fltoint $701, $701\n");
+                if(!strcmp($2.id, "==") || !strcmp($2.id, "!=")) strcat(tacCode, "seq ");
+                else if(!strcmp($2.id, ">=") || !strcmp($2.id, "<")) strcat(tacCode, "slt ");
+                else strcat(tacCode, "sleq ");
+                sprintf(reg_num, "$%d", reg);
+                strcat(tacCode, reg_num);
+                strcat(tacCode, ", $700, $701\n");
+                if(!strcmp($2.id, ">=") || !strcmp($2.id, "!=") || !strcmp($2.id, ">")){
+                    strcat(tacCode, "not ");
+                    strcat(tacCode, reg_num);
+                    strcat(tacCode, ", ");
+                    strcat(tacCode, reg_num);
+                    strcat(tacCode, "\n");
+                }
+                strcpy($$->tac, reg_num);
+                reg++;
             }else{
                 printf("SEMANTIC ERROR: Type error in relational operation with type %d and %d. [%d, %d]\n", $$->subtree1->type, $$->subtree2->type, $2.line, $2.col);
                 sem_errors++;
             }
-        } else{
-            if($$->subtree2->type == 3 || $$->subtree2->type == 4){
+        } else if($$->subtree1->type == 3 && (!strcmp($2.id, "==") || !strcmp($2.id, "!="))){
+            if($$->subtree2->type == 3){
                 $$->type = 1;
+                sprintf(reg_num, "$%d", reg);
+                strcat(tacCode, "mov $400, &");
+                strcat(tacCode, $$->subtree1->tac);
+                strcat(tacCode, "\nmov $500, &");
+                strcat(tacCode, $$->subtree2->tac);
+                strcat(tacCode, "\nmov $600, 0\n");
+                strcat(tacCode, "\nmov $601, ");
+                strcat(tacCode, $$->subtree2->tac);
+                strcat(tacCode, "_size\n");
+                strcat(tacCode, "\nmov $602, ");
+                strcat(tacCode, $$->subtree1->tac);
+                strcat(tacCode, "_size\n");
+                strcat(tacCode, "mov ");
+                strcat(tacCode, reg_num);
+                strcat(tacCode, ", 0\n");
+                strcat(tacCode, "sub $603, $601, $602\n");
+                sprintf(list_loop1, "L%d", loop);
+                loop++;
+                strcat(tacCode, "brnz ");
+                strcat(tacCode, list_loop1);
+                strcat(tacCode, ", $603\n");
+                strcat(tacCode, "mov ");
+                strcat(tacCode, reg_num);
+                strcat(tacCode, ", 1\n");
+                sprintf(loop_num, "L%d", loop);
+                loop++;
+                strcat(tacCode, loop_num);
+                strcat(tacCode, ":\n");
+                strcat(tacCode, "mov $700, $500[$600]\n");
+                strcat(tacCode, "mov $701, $400[$600]\n");
+                strcat(tacCode, "seq ");
+                strcat(tacCode, reg_num);
+                strcat(tacCode, ", $701, $700\n");
+                strcat(tacCode, "brz ");
+                strcat(tacCode, list_loop1);
+                strcat(tacCode, ", ");
+                strcat(tacCode, reg_num);
+                strcat(tacCode, "\nsub $602, $601, $600\n");
+                strcat(tacCode, "add $600, $600, 1\n");
+                strcat(tacCode, "brnz ");
+                strcat(tacCode, loop_num);
+                strcat(tacCode, ", $602\n");
+                strcat(tacCode, list_loop1);
+                strcat(tacCode, ":\n");
+                if(!strcmp($2.id, "!=")){
+                    strcat(tacCode, "not ");
+                    strcat(tacCode, reg_num);
+                    strcat(tacCode, ", ");
+                    strcat(tacCode, reg_num);
+                    strcat(tacCode, "\n");
+                }
+                strcpy($$->tac, reg_num);
+                reg++;
+            } else if($$->subtree2->type == 4){
+                $$->type = 1;
+                sprintf(reg_num, "$%d", reg);
+                strcat(tacCode, "mov $400, &");
+                strcat(tacCode, $$->subtree1->tac);
+                strcat(tacCode, "\nmov $500, &");
+                strcat(tacCode, $$->subtree2->tac);
+                strcat(tacCode, "\nmov $600, 0\n");
+                strcat(tacCode, "\nmov $601, ");
+                strcat(tacCode, $$->subtree2->tac);
+                strcat(tacCode, "_size\n");
+                strcat(tacCode, "\nmov $602, ");
+                strcat(tacCode, $$->subtree1->tac);
+                strcat(tacCode, "_size\n");
+                strcat(tacCode, "mov ");
+                strcat(tacCode, reg_num);
+                strcat(tacCode, ", 0\n");
+                strcat(tacCode, "sub $603, $601, $602\n");
+                sprintf(list_loop1, "L%d", loop);
+                loop++;
+                strcat(tacCode, "brnz ");
+                strcat(tacCode, list_loop1);
+                strcat(tacCode, ", $603\n");
+                strcat(tacCode, "\nmov ");
+                strcat(tacCode, reg_num);
+                strcat(tacCode, ", 1\n");
+                sprintf(loop_num, "L%d", loop);
+                loop++;
+                strcat(tacCode, loop_num);
+                strcat(tacCode, ":\n");
+                strcat(tacCode, "mov $700, $500[$600]\n");
+                strcat(tacCode, "fltoint $700, $700\n");
+                strcat(tacCode, "mov $701, $400[$600]\n");
+                strcat(tacCode, "seq ");
+                strcat(tacCode, reg_num);
+                strcat(tacCode, ", $701, $700\n");
+                strcat(tacCode, "brz ");
+                strcat(tacCode, list_loop1);
+                strcat(tacCode, ", ");
+                strcat(tacCode, reg_num);
+                strcat(tacCode, "\nsub $602, $601, $600\n");
+                strcat(tacCode, "add $600, $600, 1\n");
+                strcat(tacCode, "brnz ");
+                strcat(tacCode, loop_num);
+                strcat(tacCode, ", $602\n");
+                strcat(tacCode, list_loop1);
+                strcat(tacCode, ":\n");
+                if(!strcmp($2.id, "!=")){
+                    strcat(tacCode, "not ");
+                    strcat(tacCode, reg_num);
+                    strcat(tacCode, ", ");
+                    strcat(tacCode, reg_num);
+                    strcat(tacCode, "\n");
+                }
+                strcpy($$->tac, reg_num);
+                reg++;
             }else{
                 printf("SEMANTIC ERROR: Type error in relational operation with type %d and %d. [%d, %d]\n", $$->subtree1->type, $$->subtree2->type, $2.line, $2.col);
                 sem_errors++;
             }
+        } else if($$->subtree1->type == 4 && (!strcmp($2.id, "==") || !strcmp($2.id, "!="))){
+            if($$->subtree2->type == 3){
+                $$->type = 1;
+                sprintf(reg_num, "$%d", reg);
+                strcat(tacCode, "mov $400, &");
+                strcat(tacCode, $$->subtree1->tac);
+                strcat(tacCode, "\nmov $500, &");
+                strcat(tacCode, $$->subtree2->tac);
+                strcat(tacCode, "\nmov $600, 0\n");
+                strcat(tacCode, "\nmov $601, ");
+                strcat(tacCode, $$->subtree2->tac);
+                strcat(tacCode, "_size\n");
+                strcat(tacCode, "\nmov $602, ");
+                strcat(tacCode, $$->subtree1->tac);
+                strcat(tacCode, "_size\n");
+                strcat(tacCode, "mov ");
+                strcat(tacCode, reg_num);
+                strcat(tacCode, ", 0\n");
+                strcat(tacCode, "sub $603, $601, $602\n");
+                sprintf(list_loop1, "L%d", loop);
+                loop++;
+                strcat(tacCode, "brnz ");
+                strcat(tacCode, list_loop1);
+                strcat(tacCode, ", $603\n");
+                strcat(tacCode, "\nmov ");
+                strcat(tacCode, reg_num);
+                strcat(tacCode, ", 1\n");
+                sprintf(loop_num, "L%d", loop);
+                loop++;
+                strcat(tacCode, loop_num);
+                strcat(tacCode, ":\n");
+                strcat(tacCode, "mov $700, $400[$600]\n");
+                strcat(tacCode, "fltoint $700, $700\n");
+                strcat(tacCode, "mov $701, $500[$600]\n");
+                strcat(tacCode, "seq ");
+                strcat(tacCode, reg_num);
+                strcat(tacCode, ", $701, $700\n");
+                strcat(tacCode, "brz ");
+                strcat(tacCode, list_loop1);
+                strcat(tacCode, ", ");
+                strcat(tacCode, reg_num);
+                strcat(tacCode, "\nsub $602, $601, $600\n");
+                strcat(tacCode, "add $600, $600, 1\n");
+                strcat(tacCode, "brnz ");
+                strcat(tacCode, loop_num);
+                strcat(tacCode, ", $602\n");
+                strcat(tacCode, list_loop1);
+                strcat(tacCode, ":\n");
+                if(!strcmp($2.id, "!=")){
+                    strcat(tacCode, "not ");
+                    strcat(tacCode, reg_num);
+                    strcat(tacCode, ", ");
+                    strcat(tacCode, reg_num);
+                    strcat(tacCode, "\n");
+                }
+                strcpy($$->tac, reg_num);
+                reg++;
+            } else if($$->subtree2->type == 4){
+                $$->type = 1;
+                sprintf(reg_num, "$%d", reg);
+                strcat(tacCode, "mov $400, &");
+                strcat(tacCode, $$->subtree1->tac);
+                strcat(tacCode, "\nmov $500, &");
+                strcat(tacCode, $$->subtree2->tac);
+                strcat(tacCode, "\nmov $600, 0\n");
+                strcat(tacCode, "\nmov $601, ");
+                strcat(tacCode, $$->subtree2->tac);
+                strcat(tacCode, "_size\n");
+                strcat(tacCode, "\nmov $602, ");
+                strcat(tacCode, $$->subtree1->tac);
+                strcat(tacCode, "_size\n");
+                strcat(tacCode, "mov ");
+                strcat(tacCode, reg_num);
+                strcat(tacCode, ", 0\n");
+                strcat(tacCode, "sub $603, $601, $602\n");
+                sprintf(list_loop1, "L%d", loop);
+                loop++;
+                strcat(tacCode, "brnz ");
+                strcat(tacCode, list_loop1);
+                strcat(tacCode, ", $603\n");
+                strcat(tacCode, "\nmov ");
+                strcat(tacCode, reg_num);
+                strcat(tacCode, ", 1\n");
+                sprintf(loop_num, "L%d", loop);
+                loop++;
+                strcat(tacCode, loop_num);
+                strcat(tacCode, ":\n");
+                strcat(tacCode, "mov $700, $400[$600]\n");
+                strcat(tacCode, "fltoint $700, $700\n");
+                strcat(tacCode, "mov $701, $500[$600]\n");
+                strcat(tacCode, "fltoint $701, $701]\n");
+                strcat(tacCode, "seq ");
+                strcat(tacCode, reg_num);
+                strcat(tacCode, ", $701, $700\n");
+                strcat(tacCode, "brz ");
+                strcat(tacCode, list_loop1);
+                strcat(tacCode, ", ");
+                strcat(tacCode, reg_num);
+                strcat(tacCode, "\nsub $602, $601, $600\n");
+                strcat(tacCode, "add $600, $600, 1\n");
+                strcat(tacCode, "brnz ");
+                strcat(tacCode, loop_num);
+                strcat(tacCode, ", $602\n");
+                strcat(tacCode, list_loop1);
+                strcat(tacCode, ":\n");
+                if(!strcmp($2.id, "!=")){
+                    strcat(tacCode, "not ");
+                    strcat(tacCode, reg_num);
+                    strcat(tacCode, ", ");
+                    strcat(tacCode, reg_num);
+                    strcat(tacCode, "\n");
+                }
+                strcpy($$->tac, reg_num);
+                reg++;
+            }else{
+                printf("SEMANTIC ERROR: Type error in relational operation with type %d and %d. [%d, %d]\n", $$->subtree1->type, $$->subtree2->type, $2.line, $2.col);
+                sem_errors++;
+            }
+        }else{
+            printf("SEMANTIC ERROR: Type error in relational operation with type %d and %d. [%d, %d]\n", $$->subtree1->type, $$->subtree2->type, $2.line, $2.col);
+            sem_errors++;
         }
     }
     | 
@@ -987,21 +1318,34 @@ ari_op:
         $$ = newNode("ARI SS OP", 0, 0, " ");
         $$->subtree1 = $1;
         $$->subtree2 = $3;
-        if(!strcmp($2.id, "+")) strcat(tacCode, "add ");
-        else strcat(tacCode, "sub ");
-        sprintf(reg_num, "$%d", reg);
-        strcat(tacCode, reg_num);
-        strcat(tacCode, ", ");
-        strcat(tacCode, $$->subtree1->tac);
-        strcat(tacCode, ", ");
-        strcat(tacCode, $$->subtree2->tac);
-        strcat(tacCode, "\n");
-        strcpy($$->tac, reg_num);
-        reg++;
         if($$->subtree1->type == 1){
             if($$->subtree2->type == 1){
+                if(!strcmp($2.id, "+")) strcat(tacCode, "add ");
+                else strcat(tacCode, "sub ");
+                sprintf(reg_num, "$%d", reg);
+                strcat(tacCode, reg_num);
+                strcat(tacCode, ", ");
+                strcat(tacCode, $$->subtree1->tac);
+                strcat(tacCode, ", ");
+                strcat(tacCode, $$->subtree2->tac);
+                strcat(tacCode, "\n");
+                strcpy($$->tac, reg_num);
+                reg++;
                 $$->type = $$->subtree1->type;
             }else if($$->subtree2->type == 2){
+                strcat(tacCode, "mov $700, ");
+                strcat(tacCode, $$->subtree1->tac);
+                strcat(tacCode, "\n");
+                strcat(tacCode, "inttofl $700, $700\n");
+                if(!strcmp($2.id, "+")) strcat(tacCode, "add ");
+                else strcat(tacCode, "sub ");
+                sprintf(reg_num, "$%d", reg);
+                strcat(tacCode, reg_num);
+                strcat(tacCode, ", ");
+                strcat(tacCode, $$->subtree2->tac);
+                strcat(tacCode, ", $700\n");
+                strcpy($$->tac, reg_num);
+                reg++;
                 $$->type = $$->subtree2->type;
             }else{
                 printf("SEMANTIC ERROR: Type error in arithmetic operation with type %d and %d. [%d, %d]\n", $$->subtree1->type, $$->subtree2->type, $2.line, $2.col);
@@ -1009,8 +1353,34 @@ ari_op:
             }
         } else if($$->subtree1->type == 2){
             if($$->subtree2->type == 1){
+                strcat(tacCode, "mov $700, ");
+                strcat(tacCode, $$->subtree2->tac);
+                strcat(tacCode, "\n");
+                strcat(tacCode, "inttofl $700, $700\n");
+                if(!strcmp($2.id, "+")) strcat(tacCode, "add ");
+                else strcat(tacCode, "sub ");
+                sprintf(reg_num, "$%d", reg);
+                strcat(tacCode, reg_num);
+                strcat(tacCode, ", ");
+                strcat(tacCode, $$->subtree1->tac);
+                strcat(tacCode, ", $700\n");
+                strcpy($$->tac, reg_num);
+                reg++;
                 $$->type = $$->subtree1->type;
             }else if($$->subtree2->type == 2){
+                strcat(tacCode, "mov $700, ");
+                strcat(tacCode, $$->subtree1->tac);
+                strcat(tacCode, "\n");
+                strcat(tacCode, "mov $701, ");
+                strcat(tacCode, $$->subtree2->tac);
+                strcat(tacCode, "\n");
+                if(!strcmp($2.id, "+")) strcat(tacCode, "add ");
+                else strcat(tacCode, "sub ");
+                sprintf(reg_num, "$%d", reg);
+                strcat(tacCode, reg_num);
+                strcat(tacCode, ", $701, $700\n");
+                strcpy($$->tac, reg_num);
+                reg++;
                 $$->type = $$->subtree2->type;
             }else{
                 printf("SEMANTIC ERROR: Type error in arithmetic operation with type %d and %d. [%d, %d]\n", $$->subtree1->type, $$->subtree2->type, $2.line, $2.col);
@@ -1049,21 +1419,34 @@ md_op:
         $$ = newNode("ARI MD OP", 0, 0, " ");
         $$->subtree1 = $1;
         $$->subtree2 = $3;
-        if(!strcmp($2.id, "*")) strcat(tacCode, "mul ");
-        else strcat(tacCode, "div ");
-        sprintf(reg_num, "$%d", reg);
-        strcat(tacCode, reg_num);
-        strcat(tacCode, ", ");
-        strcat(tacCode, $$->subtree1->tac);
-        strcat(tacCode, ", ");
-        strcat(tacCode, $$->subtree2->tac);
-        strcat(tacCode, "\n");
-        strcpy($$->tac, reg_num);
-        reg++;
         if($$->subtree1->type == 1){
             if($$->subtree2->type == 1){
+                if(!strcmp($2.id, "*")) strcat(tacCode, "mul ");
+                else strcat(tacCode, "div ");
+                sprintf(reg_num, "$%d", reg);
+                strcat(tacCode, reg_num);
+                strcat(tacCode, ", ");
+                strcat(tacCode, $$->subtree1->tac);
+                strcat(tacCode, ", ");
+                strcat(tacCode, $$->subtree2->tac);
+                strcat(tacCode, "\n");
+                strcpy($$->tac, reg_num);
+                reg++;
                 $$->type = $$->subtree1->type;
             }else if($$->subtree2->type == 2){
+                strcat(tacCode, "mov $700, ");
+                strcat(tacCode, $$->subtree1->tac);
+                strcat(tacCode, "\n");
+                strcat(tacCode, "inttofl $700, $700\n");
+                if(!strcmp($2.id, "*")) strcat(tacCode, "mul ");
+                else strcat(tacCode, "div ");
+                sprintf(reg_num, "$%d", reg);
+                strcat(tacCode, reg_num);
+                strcat(tacCode, ", $700, ");
+                strcat(tacCode, $$->subtree2->tac);
+                strcat(tacCode, "\n");
+                strcpy($$->tac, reg_num);
+                reg++;
                 $$->type = $$->subtree2->type;
             }else{
                 printf("SEMANTIC ERROR: Type error in arithmetic operation with type %d and %d. [%d, %d]\n", $$->subtree1->type, $$->subtree2->type, $2.line, $2.col);
@@ -1071,8 +1454,34 @@ md_op:
             }
         } else if($$->subtree1->type == 2){
             if($$->subtree2->type == 1){
+                strcat(tacCode, "mov $700, ");
+                strcat(tacCode, $$->subtree2->tac);
+                strcat(tacCode, "\n");
+                strcat(tacCode, "inttofl $700, $700\n");
+                if(!strcmp($2.id, "*")) strcat(tacCode, "mul ");
+                else strcat(tacCode, "div ");
+                sprintf(reg_num, "$%d", reg);
+                strcat(tacCode, reg_num);
+                strcat(tacCode, ", ");
+                strcat(tacCode, $$->subtree1->tac);
+                strcat(tacCode, ", $700\n");
+                strcpy($$->tac, reg_num);
+                reg++;
                 $$->type = $$->subtree1->type;
             }else if($$->subtree2->type == 2){
+                strcat(tacCode, "mov $700, ");
+                strcat(tacCode, $$->subtree1->tac);
+                strcat(tacCode, "\n");
+                strcat(tacCode, "mov $701, ");
+                strcat(tacCode, $$->subtree2->tac);
+                strcat(tacCode, "\n");
+                if(!strcmp($2.id, "*")) strcat(tacCode, "mul ");
+                else strcat(tacCode, "div ");
+                sprintf(reg_num, "$%d", reg);
+                strcat(tacCode, reg_num);
+                strcat(tacCode, ", $700, $701\n");
+                strcpy($$->tac, reg_num);
+                reg++;
                 $$->type = $$->subtree2->type;
             }else{
                 printf("SEMANTIC ERROR: Type error in arithmetic operation with type %d and %d. [%d, %d]\n", $$->subtree1->type, $$->subtree2->type, $2.line, $2.col);
@@ -1111,37 +1520,11 @@ un_op:
                     strcat(tacCode, "mov $601, ");
                     strcat(tacCode, $$->subtree1->tac);
                     strcat(tacCode, "_size\n");
-                    sprintf(loop_num, "L%d", loop);
+                    sprintf(list_loop1, "L%d", loop);
                     loop++;
-                    strcat(tacCode, loop_num);
-                    strcat(tacCode, ":\n");
-                    strcat(tacCode, "mov $603, $500[$605]\n");
-                    strcat(tacCode, "mov $500[$600], $603\n");
-                    strcat(tacCode, "add $600, $600, 1\n");
-                    strcat(tacCode, "add $605, $605, 1\n");
-                    strcat(tacCode, "sub $602, $601, $600\n");
-                    strcat(tacCode, "brnz ");
-                    strcat(tacCode, loop_num);
-                    strcat(tacCode, ", $602\n");
-                    strcat(tacCode, "sub ");
-                    strcat(tacCode, $$->subtree1->tac);
-                    strcat(tacCode, "_size, ");
-                    strcat(tacCode, $$->subtree1->tac);
-                    strcat(tacCode, "_size, 1\n");
-                    strcpy($$->tac, $$->subtree1->tac);
-                    $$->type = $$->subtree1->type;
-                }
-            }else{
-                if($$->subtree1->type < 3){
-                    printf("SEMANTIC ERROR: Type error in unary operator with type %d. [%d, %d]\n", $$->subtree1->type, $1.line, $1.col);
-                    sem_errors++;
-                }else if(!strcmp($1.id, "%")){
-                    strcat(tacCode, "// tail\n");
-                    strcat(tacCode, "mov $500, &");
-                    strcat(tacCode, $$->subtree1->tac);
-                    strcat(tacCode, "\nmov $600, 0\n");
-                    strcat(tacCode, "mov $605, 1\n");
-                    strcat(tacCode, "mov $601, ");
+                    strcat(tacCode, "brz ");
+                    strcat(tacCode, list_loop1);
+                    strcat(tacCode, ", ");
                     strcat(tacCode, $$->subtree1->tac);
                     strcat(tacCode, "_size\n");
                     sprintf(loop_num, "L%d", loop);
@@ -1162,6 +1545,50 @@ un_op:
                     strcat(tacCode, $$->subtree1->tac);
                     strcat(tacCode, "_size, 1\n");
                     strcpy($$->tac, $$->subtree1->tac);
+                    strcat(tacCode, list_loop1);
+                    strcat(tacCode, ":\n");
+                    $$->type = $$->subtree1->type;
+                }
+            }else{
+                if($$->subtree1->type < 3){
+                    printf("SEMANTIC ERROR: Type error in unary operator with type %d. [%d, %d]\n", $$->subtree1->type, $1.line, $1.col);
+                    sem_errors++;
+                }else if(!strcmp($1.id, "%")){
+                    strcat(tacCode, "// tail\n");
+                    strcat(tacCode, "mov $500, &");
+                    strcat(tacCode, $$->subtree1->tac);
+                    strcat(tacCode, "\nmov $600, 0\n");
+                    strcat(tacCode, "mov $605, 1\n");
+                    strcat(tacCode, "mov $601, ");
+                    strcat(tacCode, $$->subtree1->tac);
+                    strcat(tacCode, "_size\n");
+                    sprintf(list_loop1, "L%d", loop);
+                    loop++;
+                    strcat(tacCode, "brz ");
+                    strcat(tacCode, list_loop1);
+                    strcat(tacCode, ", ");
+                    strcat(tacCode, $$->subtree1->tac);
+                    strcat(tacCode, "_size\n");
+                    sprintf(loop_num, "L%d", loop);
+                    loop++;
+                    strcat(tacCode, loop_num);
+                    strcat(tacCode, ":\n");
+                    strcat(tacCode, "mov $603, $500[$605]\n");
+                    strcat(tacCode, "mov $500[$600], $603\n");
+                    strcat(tacCode, "add $600, $600, 1\n");
+                    strcat(tacCode, "add $605, $605, 1\n");
+                    strcat(tacCode, "sub $602, $601, $600\n");
+                    strcat(tacCode, "brnz ");
+                    strcat(tacCode, loop_num);
+                    strcat(tacCode, ", $602\n");
+                    strcat(tacCode, "sub ");
+                    strcat(tacCode, $$->subtree1->tac);
+                    strcat(tacCode, "_size, ");
+                    strcat(tacCode, $$->subtree1->tac);
+                    strcat(tacCode, "_size, 1\n");
+                    strcpy($$->tac, $$->subtree1->tac);
+                    strcat(tacCode, list_loop1);
+                    strcat(tacCode, ":\n");
                     $$->type = $$->subtree1->type;
                 }else{
                     strcat(tacCode, "// head\n");
@@ -1197,9 +1624,7 @@ val:
     |
     LITERAL {
         strcat(tacTable, "char ");
-        str_num[0] = '_';
-        str_num[1] = 's';
-        str_num[2] = str + '0';
+        sprintf(str_num, "_s%d", str);
         strcat(tacTable, str_num);
         strcat(tacTable, "[] = ");
         strcat(tacTable, $1.id);
@@ -1232,6 +1657,16 @@ func_call:
         sprintf(str_num, "%d", args);
         strcat(tacCode, str_num);
         strcat(tacCode, "\n");
+        if(return_type > 2){
+            strcpy($$->tac, current_return);
+        }else{
+            sprintf(reg_num, "$%d", reg);
+            reg++;
+            strcat(tacCode, "pop ");
+            strcat(tacCode, reg_num);
+            strcat(tacCode, "\n");
+            strcpy($$->tac, reg_num);
+        }
         args = 0;
 
     }
@@ -1259,8 +1694,8 @@ id:
             sem_errors++;
         }
         param = checkParams(table, $1.id, stack[scope_pos]);
-        sprintf(reg_num, "#%d", param-1);
         id_scope = checkScope(table, $1.id, stack[scope_pos]);
+        sprintf(reg_num, "#%d", param-1);
         sprintf(str_num, "_s%d", id_scope);
         strcpy(tac, $1.id);
         strcat(tac, str_num);
