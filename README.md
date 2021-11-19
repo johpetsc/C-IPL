@@ -54,23 +54,23 @@ This was the project implemented throughout the course of Compilers (Tradutores)
 
 - Operations on lists are described below:
 
--- declaration: int list, float list.
+- declaration: int list, float list.
 
--- assignment: assignment is done by reference.
--- constructors (right associative): the constant NIL has already been mentioned; the operator : is the infix binary list constructor: the left operand is an expression (rvalue) and the right operand is a list (lvalue). The element is always added to the beginning of the list.
+- assignment: assignment is done by reference.
+- constructors (right associative): the constant NIL has already been mentioned; the operator : is the infix binary list constructor: the left operand is an expression (rvalue) and the right operand is a list (lvalue). The element is always added to the beginning of the list.
 
--- operators (right associative)
+- operators (right associative)
 
-header: ? is the unary operator that returns the value of the first element of a list; the list remains unchanged; using the operator on an empty list has undefined behavior.
+- header: ? is the unary operator that returns the value of the first element of a list; the list remains unchanged; using the operator on an empty list has undefined behavior.
 
-tail: ! is unary operator that returns the tail of a list; the list remains unchanged; using the operator on an empty list has undefined behavior.
+- tail: ! is unary operator that returns the tail of a list; the list remains unchanged; using the operator on an empty list has undefined behavior.
 
--- destructor (right associative)
+- destructor (right associative)
 
-tail: % is unary operator that returns the tail of the list; the list has its first element removed; using the operator on an empty list has undefined behavior.
+- tail: % is unary operator that returns the tail of the list; the list has its first element removed; using the operator on an empty list has undefined behavior.
 
--- functions (associative on the right):
+- functions (associative on the right):
 
-map: >> is the infix binary operator that has a unary function as its first argument and a list as its second argument; returns a list with the function applied to the elements of the second element; does not change the list passed as an argument.
+- map: >> is the infix binary operator that has a unary function as its first argument and a list as its second argument; returns a list with the function applied to the elements of the second element; does not change the list passed as an argument.
 
-filter: << is the infix binary operator that has a unary function as its first argument and a list as its second argument; returns the list of elements of the second argument for which the function given as the first argument returns a nonzero value; does not change the list passed as an argument. 
+- filter: << is the infix binary operator that has a unary function as its first argument and a list as its second argument; returns the list of elements of the second argument for which the function given as the first argument returns a nonzero value; does not change the list passed as an argument. 
