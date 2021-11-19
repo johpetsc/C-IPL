@@ -1,7 +1,7 @@
 # C-IPL
-Implementation of the analysis part (or front end) of a compiler, based on the C-IPL language. It consists of a lexical analyzer, syntatic analyzer, semantic analyzer and intermediate code generator.
+Implementation of the analysis part (or front end) of a compiler, based on the C-IPL language. It consists of a lexical analyzer, syntax analyzer, semantic analyzer and intermediate code generator.
 
-The C-IPL language was designed to include ease in the handling of lists in programs written in C. For that, a subset of the C language was chosen and a new primitive of data for lists and operations was introduced. All other C primitives and commands have standard semantics. 
+The C-IPL language was designed to ease the handling of lists in programs written in C. For that, a subset of the C language was chosen and a new primitive of data for lists and operations was introduced. All other C primitives and commands have standard semantics. 
 
 This was the project implemented throughout the course of Compilers (Tradutores), lectured in the semester of 1/2021 and one of the final subjects taught in the Computer Science degree at the University of Brasília.
 
